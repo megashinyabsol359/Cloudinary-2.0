@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Đăng nhập bằng khuôn mặt</title>
+</head>
+<body>
+    <h2>Đăng nhập bằng khuôn mặt</h2>
+    <form method="POST" action="/login_face" enctype="multipart/form-data">
+        <label for="username">Tên đăng nhập:</label>
+        <input type="text" name="username" required><br>
+
+        <label for="image">Tải ảnh khuôn mặt lên:</label>
+        <input type="file" name="image" accept="image/*" required><br>
+
+        <button type="submit">Đăng nhập bằng khuôn mặt</button>
+    </form>
+    <p><a href="/login">Đăng nhập bằng tên đăng nhập và mật khẩu</a></p>
+
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+    <ul>
+        {% for message in messages %}
+        <li style="color: red;">{{ message }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+    {% endwith %}
+    
+</body>
+</html>
