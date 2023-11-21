@@ -137,7 +137,7 @@ def login_face_post():
         return redirect(url_for('auth.login_face'))
     face_encoding = face_recognition.face_encodings(image)[0]
     
-    if user.face_encoding is None or face_recognition.compare_faces([user.face_encoding], face_encoding)[0]:
+    if user.face_encoding is None or not face_recognition.compare_faces([user.face_encoding], face_encoding)[0]:
         flash('Xác thực bằng khuôn mặt không thành công. Vui lòng kiểm tra lại thông tin đăng nhập.', 'danger')
         return redirect(url_for('auth.login_face'))
         
