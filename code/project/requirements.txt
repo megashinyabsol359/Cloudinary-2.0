@@ -1,0 +1,9 @@
+Flask
+Flask-Reuploaded
+Flask-WTF
+Flask-SQLAlchemy
+Flask-Login
+opencv-python
+Werkzeug
+WTForms
+face_recognition

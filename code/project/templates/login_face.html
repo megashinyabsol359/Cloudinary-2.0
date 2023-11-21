@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="column is-4 is-offset-4">
+    <h3 class="title">Login</h3>
+    <div class="box">
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <div class="notification is-danger">
+                {{ messages[0] }}
+            </div>
+        {% endif %}
+        {% endwith %}
+
+        <form method="POST" action="/login_face" enctype="multipart/form-data">
+            <label for="username">Tên đăng nhập:</label>
+            <input type="text" name="username" required><br>
+    
+            <label for="image">Tải ảnh khuôn mặt lên:</label>
+            <input type="file" name="image" accept="image/*" required><br>
+    
+            <button type="submit">Đăng nhập bằng khuôn mặt</button>
+            <div class="field">
+                <label class="checkbox">
+                    <input type="checkbox" name="remember">
+                    Remember me
+                </label>
+            </div>
+        </form>
+
+        <a href="{{ url_for('auth.login') }}">
+            Đăng nhập bằng mật khẩu
+        </a>        
+
+    </div>
+</div>
+{% endblock %}
