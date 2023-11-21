@@ -4,7 +4,15 @@
 <h1 class="title">
     Welcome, {{ name }}!
 </h1>
-<a href="{{ url_for('auth.register_face') }}">
-    Tạo Face ID
-</a>
+<div>
+    <a href="{{ url_for('auth.register_face') }}" class="button is-block is-info is-large is-fullwidth">
+        Tạo Face ID bằng face
+    </a>
+</div>
+<div>
+    <a href="{{ url_for('auth.register_cam') }}" class="button is-block is-info is-large is-fullwidth">
+        Tạo Face ID bằng cam
+    </a>
+</div>
+
 {% endblock %}

@@ -11,6 +11,7 @@ def create_app():
 
     app.config['SECRET_KEY'] = 'secret-key-goes-here'
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///db.sqlite'
+    
     app.config['UPLOADED_PHOTOS_DEST'] = 'uploads'
 
     photos = UploadSet('photos', IMAGES)

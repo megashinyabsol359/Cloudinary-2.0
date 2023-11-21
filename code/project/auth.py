@@ -16,20 +16,20 @@ def login():
 
 @auth.route('/login', methods=['POST'])
 def login_post():
-    # login code goes here
+    # code login
     email = request.form.get('email')
     password = request.form.get('password')
     remember = True if request.form.get('remember') else False
 
     user = User.query.filter_by(email=email).first()
 
-    # check if the user actually exists
-    # take the user-supplied password, hash it, and compare it to the hashed password in the database
+    # kiểm tra user tồn tại trong database
+    # kiểm tra password với hash
     if not user or not check_password_hash(user.password, password):
-        flash('Please check your login details and try again.')
+        flash('Vui lòng kiểm tra lại thông tin đăng nhập')
         return redirect(url_for('auth.login')) # if the user doesn't exist or password is wrong, reload the page
 
-    # if the above check passes, then we know the user has the right credentials
+    # nếu đúng hết ở trên thì đăng nhập người dùng
     login_user(user, remember=remember)
     return redirect(url_for('main.profile'))
 
@@ -40,21 +40,28 @@ def signup():
 
 @auth.route('/signup', methods=['POST'])
 def signup_post():
-    # code to validate and add user to database goes here
+    # code lấy thông tin từ người dùng
     email = request.form.get('email')
     name = request.form.get('name')
     password = request.form.get('password')
+    password_confirm = request.form.get('password_confirm')
 
-    user = User.query.filter_by(email=email).first() # if this returns a user, then the email already exists in database
+    user = User.query.filter_by(email=email).first() # kiểm tra người dùng trong database qua email
 
-    if user: # if a user is found, we want to redirect back to signup page so user can try again
-        flash('Email address already exists')
+    if user: # nếu tìm ra người dùng thì quay về trang signup dùng gmail khác
+        flash('Tài khoản sử dụng Email này đã tồn tại')
+        return redirect(url_for('auth.signup'))
+    if len(password) < 8 or len(password) > 50:# nếu password ko hợp lệ
+        flash('Mật khẩu phải có từ 8 đến 50 ký tự')
+        return redirect(url_for('auth.signup'))
+    if password != password_confirm:# nếu password và nhập lại ko khớp
+        flash('Mật khẩu và xác nhận mật khẩu không khớp')
         return redirect(url_for('auth.signup'))
 
-    # create a new user with the form data. Hash the password so the plaintext version isn't saved.
+    # nếu đúng hết thì tạo tài khoản mới, hash password
     new_user = User(email=email, name=name, password=generate_password_hash(password, method='sha256'))
 
-    # add the new user to the database
+    # thêm vào database
     db.session.add(new_user)
     db.session.commit()
 
@@ -74,10 +81,10 @@ def register_face():
 @auth.route('/register_face', methods=['POST'])
 @login_required
 def register_face_post():
-    user = User.query.filter_by(id=current_user.get_id()).first()
     uploaded_image = request.files['image']
+    user = User.query.filter_by(id=current_user.get_id()).first()
 
-    if uploaded_image:
+    if uploaded_image:# kiểm tra có hình chưa
         image = face_recognition.load_image_file(uploaded_image)
         face_locations = face_recognition.face_locations(image)
 
@@ -94,7 +101,7 @@ def register_face_post():
 
             db.session.commit()
             flash('Đăng ký khuôn mặt thành công!', 'success')
-            redirect(url_for('main.profile'))
+            return redirect(url_for('auth.register_face'))
         else:
             flash('Vui lòng tải lên một ảnh chứa duy nhất một khuôn mặt.', 'danger')
     else:
@@ -108,37 +115,56 @@ def login_face():
 
 @auth.route('/login_face', methods=['POST'])
 def login_face_post():
-    email = request.form['username']
-    user = User.query.filter_by(email=email).first() # if this returns a user, then the email already exists in database
+    email = request.form.get('email')
+    user = User.query.filter_by(email=email).first() # kiểm tra tài khoản trong database qua email
     remember = True if request.form.get('remember') else False
 
-    if 'image' in request.files:
-        uploaded_image = request.files['image']
+    uploaded_image = request.files['image']
+        
+    if not user: # nếu tìm ra người dùng thì quay về trang signup dùng gmail khác
+        flash('Xác thực bằng khuôn mặt không thành công. Vui lòng kiểm tra lại thông tin đăng nhập.')
+        return redirect(url_for('auth.login_face'))
 
-        if uploaded_image:
-            image = face_recognition.load_image_file(uploaded_image)
-            face_locations = face_recognition.face_locations(image)
+    if not uploaded_image:# kiểm tra có hình chưa
+        flash('Vui lòng tải lên một ảnh.', 'danger')
+        return redirect(url_for('auth.login_face'))
+        
+    image = face_recognition.load_image_file(uploaded_image)
+    face_locations = face_recognition.face_locations(image)
 
-            if len(face_locations) == 1:
-                face_encoding = face_recognition.face_encodings(image)[0]
-                if user:
-                    print(user.face_encoding)
-                    if user.face_encoding is not None:
-                        if face_recognition.compare_faces([user.face_encoding], face_encoding)[0]:
-                            login_user(user, remember=remember)
-                            return redirect(url_for('main.profile'))  # Chuyển hướng sau khi xác thực bằng khuôn mặt
-                        else:
-                            flash('Xác thực bằng khuôn mặt không thành công. Vui lòng kiểm tra lại.', 'danger')
-                    else:
-                        flash('Tài khoản chưa được đăng ký khuôn mặt. Vui lòng đăng ký khuôn mặt.', 'danger')
-                else:
-                    flash('Tài khoản không tồn tại. Vui lòng kiểm tra thông tin đăng nhập!', 'danger')
-            else:
-                flash('Vui lòng tải lên một ảnh chứa duy nhất một khuôn mặt.', 'danger')
-        else:
-            flash('Vui lòng tải lên một ảnh.', 'danger')
+    if len(face_locations) != 1:
+        flash('Vui lòng tải lên một ảnh chứa duy nhất một khuôn mặt.', 'danger')
+        return redirect(url_for('auth.login_face'))
+    face_encoding = face_recognition.face_encodings(image)[0]
+    
+    if user.face_encoding is None or face_recognition.compare_faces([user.face_encoding], face_encoding)[0]:
+        flash('Xác thực bằng khuôn mặt không thành công. Vui lòng kiểm tra lại thông tin đăng nhập.', 'danger')
+        return redirect(url_for('auth.login_face'))
+        
+    login_user(user, remember=remember) # Sau khi qua hết thì đăng nhập user
+    return redirect(url_for('main.profile'))  # Chuyển hướng sau khi xác thực bằng khuôn mặt
 
-    # if the above check passes, then we know the user has the right credentials
-    #flash('Email address already exists')
-    return redirect(url_for('auth.login_face'))
+@auth.route('/register_cam')
+@login_required
+def register_cam():
+    # initialize the camera 
+    # If you have multiple camera connected with  
+    # current device, assign a value in cam_port  
+    # variable according to that 
+    cam_port = 0
+    cam = cv2.VideoCapture(cam_port) 
+  
+    # reading the input using the camera 
+    result, image = cam.read() 
+  
+    # If image will detected without any error,  
+    # show result 
+    print("CAM IS RUNNING")
+    if result: 
+        return render_template('register_cam.html', image_url = image)
+        
+    # If captured image is corrupted, moving to else part 
+    else: 
+        print("No image detected. Please! try again") 
 
+    return render_template('register_cam.html')

@@ -1,19 +1,24 @@
 {% extends "base.html" %}
 
 {% block content %}
-<form action="/register_face" method="POST" enctype="multipart/form-data">
-    <input type="file" name="image" accept="image/*" required>
-    <button type="submit">Đăng ký bằng khuôn mặt</button>
-</form>
+<div class="column is-4 is-offset-4">
+    <h3 class="title">Tạo Face ID</h3>
+    <div class="box">
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <div class="notification is-danger">
+                {{ messages[0] }}
+            </div>
+        {% endif %}
+        {% endwith %}
 
-{% with messages = get_flashed_messages() %}
-{% if messages %}
-<ul>
-    {% for message in messages %}
-    <li style="color: red;">{{ message }}</li>
-    {% endfor %}
-</ul>
-{% endif %}
-{% endwith %}
+        <form action="/register_face" method="POST" enctype="multipart/form-data">
+            <input type="file" name="image" accept="image/*" required>
+            <button type="submit" class="button is-block is-info is-large is-fullwidth">Đăng ký bằng khuôn mặt</button>
+        </form>
+
+    </div>
+</div>
+
 
 {% endblock %}
