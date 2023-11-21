@@ -1,8 +1,0 @@
-Flask
-Flask-Reuploaded
-Flask-WTF
-Flask-SQLAlchemy
-Flask-Login
-opencv-python
-Werkzeug==2.3.0
-WTForms
