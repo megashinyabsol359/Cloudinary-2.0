@@ -7,3 +7,4 @@ opencv-python
 Werkzeug
 WTForms
 face_recognition
+setuptools
