@@ -8,6 +8,9 @@ import cv2
 from .models import User
 from . import db
 
+import base64
+import numpy as np
+
 auth = Blueprint('auth', __name__)
 
 @auth.route('/login')
@@ -144,27 +147,74 @@ def login_face_post():
     login_user(user, remember=remember) # Sau khi qua hết thì đăng nhập user
     return redirect(url_for('main.profile'))  # Chuyển hướng sau khi xác thực bằng khuôn mặt
 
+# @auth.route('/register_cam', methods=['POST', 'GET'])
+# @login_required
+# def register_cam():
+#     # initialize the camera 
+#     # If you have multiple camera connected with  
+#     # current device, assign a value in cam_port  
+#     # variable according to that 
+#     cam_port = 0
+#     cam = cv2.VideoCapture(cam_port) 
+  
+#     # reading the input using the camera 
+#     result, image = cam.read() 
+  
+#     # If image will detected without any error,  
+#     # show result 
+#     print("CAM IS RUNNING")
+#     if result: 
+#         return render_template('register_cam.html', image_url = image)
+        
+#     # If captured image is corrupted, moving to else part 
+#     else: 
+#         print("No image detected. Please! try again") 
+
+#     return render_template('register_cam.html')
+
 @auth.route('/register_cam')
 @login_required
 def register_cam():
-    # initialize the camera 
-    # If you have multiple camera connected with  
-    # current device, assign a value in cam_port  
-    # variable according to that 
-    cam_port = 0
-    cam = cv2.VideoCapture(cam_port) 
-  
-    # reading the input using the camera 
-    result, image = cam.read() 
-  
-    # If image will detected without any error,  
-    # show result 
-    print("CAM IS RUNNING")
-    if result: 
-        return render_template('register_cam.html', image_url = image)
-        
-    # If captured image is corrupted, moving to else part 
-    else: 
-        print("No image detected. Please! try again") 
-
     return render_template('register_cam.html')
+
+@auth.route('/register_cam', methods=['POST'])
+@login_required
+def register_cam_post():
+    # Nhận dữ liệu hình ảnh từ yêu cầu POST
+    data_url = request.json['image']
+
+    # Loại bỏ phần đầu của chuỗi dữ liệu URL (prefix "data:image/jpeg;base64,")
+    img_data = data_url.split(',')[1]
+
+    # Chuyển đổi dữ liệu hình ảnh từ base64 sang binary
+    binary_data = base64.b64decode(img_data)
+
+    jpg_as_np = np.frombuffer(binary_data, dtype=np.uint8)
+    #image_buffer = cv2.imdecode(jpg_as_np, flags=1)
+    
+    image = cv2.imdecode(jpg_as_np, flags=1)
+    face_locations = face_recognition.face_locations(image)
+
+    user = User.query.filter_by(id=current_user.get_id()).first()
+    print(image)
+
+    if len(face_locations) == 1:  # Chỉ xử lý ảnh có một khuôn mặt
+        face_encoding = face_recognition.face_encodings(image)[0]
+
+        # Cắt hình ảnh khuôn mặt
+        top, right, bottom, left = face_locations[0]
+        face_image = image[top:bottom, left:right]
+
+        # Lưu hình ảnh khuôn mặt đã cắt xuống cơ sở dữ liệu
+        user.face_encoding = face_encoding
+        user.face_image = cv2.imencode('.jpg', face_image)[1].tobytes()  # Chuyển hình ảnh thành dữ liệu nhị phân
+
+        db.session.commit()
+        flash('Đăng ký khuôn mặt thành công!', 'success')
+        print('Đăng ký khuôn mặt thành công!')
+        return redirect(url_for('auth.register_cam'))
+    else:
+        flash('Vui lòng trong facecam chỉ chứa duy nhất một khuôn mặt.', 'danger')
+        print('Vui lòng trong facecam chỉ chứa duy nhất một khuôn mặt!')
+
+    return redirect(url_for('auth.register_cam'))

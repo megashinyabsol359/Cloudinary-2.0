@@ -3,8 +3,13 @@ Flask-Reuploaded
 Flask-WTF
 Flask-SQLAlchemy
 Flask-Login
+Flask-SocketIO
 opencv-python
 Werkzeug
 WTForms
 face_recognition
 setuptools
+flask_socketio
+imutils
+pyopenssl
+flask-talisman

@@ -1,7 +1,88 @@
 {% extends "base.html" %}
 
 {% block content %}
-{% if file_url %}
-    <img src="{{ image_url }}" style="width: 400px;">
-{% endif %}
+<div class="column is-4 is-offset-4">
+    <h3 class="title">Tạo Face ID bằng facecam</h3>
+    <div class="box">
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <div class="notification is-danger">
+                {{ messages[0] }}
+            </div>
+        {% endif %}
+        {% endwith %}
+
+        <video id="video" width="640" height="480" autoplay></video>
+        <canvas id="canvas" width="320" height="240"></canvas>
+        <button onclick="startCamera()" type="button">Start Camera</button>
+        <button onclick="captureImage()" type="button">Capture Image</button>
+        <button onclick="stopCamera()" type="button">Stop Camera</button>
+        <script>
+            let videoStream;
+        
+            function startCamera() {
+                var video = document.getElementById('video');
+                
+                navigator.mediaDevices.getUserMedia({ video: true })
+                    .then(function (stream) {
+                        videoStream = stream;
+                        video.srcObject = stream;
+                    })
+                    .catch(function (err) {
+                        console.error('Error accessing user media: ', err);
+                    });
+            }
+        
+            function captureImage() {
+                canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+                let image_data_url = canvas.toDataURL('image/jpeg');
+        
+                // data url of the image
+                console.log(image_data_url);
+        
+                // // Send the data URL to the server using a POST request
+                // fetch('/takeimage', {
+                //     method: 'POST',
+                //     headers: {
+                //         'Content-Type': 'application/json',
+                //     },
+                //     body: JSON.stringify({ image: image_data_url }),
+                // })
+                // .then(response => response.json())
+                // .then(data => {
+                //     console.log('Image captured and sent to server:', data);
+                // })
+                // .catch(error => {
+                //     console.error('Error capturing and sending image:', error);
+                // });
+        
+                // Send the data URL to the server using a POST request
+                fetch('/register_cam', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ image: image_data_url }),
+                })
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Image captured and sent to server:', data);
+                })
+                .catch(error => {
+                    console.error('Error capturing and sending image:', error);
+                });
+        
+            }
+        
+            function stopCamera() {
+                if (videoStream) {
+                    let tracks = videoStream.getTracks();
+                    tracks.forEach(track => track.stop());
+                    document.getElementById('video').srcObject = null;
+                }
+            }
+        </script>        
+    </div>
+</div>
+
 {% endblock %}

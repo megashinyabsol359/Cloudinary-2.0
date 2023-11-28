@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, send_from_directory, url_for, current_app
+from flask import Blueprint, render_template, send_from_directory, url_for, current_app, request, Response
 from flask_login import login_required, current_user
 from flask_uploads import UploadSet, IMAGES
 from flask_wtf import FlaskForm
@@ -6,6 +6,9 @@ from flask_wtf.file import FileField, FileRequired, FileAllowed
 from wtforms import SubmitField
 from . import db
 from . import opencv
+
+import base64
+import os
 
 main = Blueprint('main', __name__)
 
@@ -32,6 +35,28 @@ class UploadForm(FlaskForm):
 @main.route('/uploads/<filename>')
 def get_file(filename):
     return send_from_directory(current_app.config['UPLOADED_PHOTOS_DEST'], filename)
+
+@main.route('/takeimage', methods=['POST'])
+def takeimage():
+    # Nhận dữ liệu hình ảnh từ yêu cầu POST
+    data_url = request.json['image']
+
+    # Loại bỏ phần đầu của chuỗi dữ liệu URL (prefix "data:image/jpeg;base64,")
+    img_data = data_url.split(',')[1]
+
+    # Chuyển đổi dữ liệu hình ảnh từ base64 sang binary
+    binary_data = base64.b64decode(img_data)
+
+    # Lưu hình ảnh vào thư mục static/images với tên duy nhất và định dạng jpg
+    image_name = f'image.jpg'
+    image_path = os.path.join(image_name)
+    with open(image_path, 'wb') as f:
+        f.write(binary_data)
+
+    print(f'Image saved at: {image_path}')
+
+    return Response(status=200)
+
 
 @main.route('/RGBtoGray', methods = ['GET', 'POST'])
 @login_required
