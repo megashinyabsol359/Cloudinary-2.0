@@ -4,5 +4,3 @@
 
 # TO-DO LIST:
 - Làm Project Plan hoàn chỉnh
-- Tìm kiếm những ứng dụng giống v và so sánh
-- Đem code của đăng nhập và đăng nhập bằng mặt ng lên
