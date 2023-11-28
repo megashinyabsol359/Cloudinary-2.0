@@ -62,7 +62,7 @@ def signup_post():
         return redirect(url_for('auth.signup'))
 
     # nếu đúng hết thì tạo tài khoản mới, hash password
-    new_user = User(email=email, name=name, password=generate_password_hash(password, method='sha256'))
+    new_user = User(email=email, name=name, password=generate_password_hash(password))
 
     # thêm vào database
     db.session.add(new_user)
@@ -147,30 +147,6 @@ def login_face_post():
     login_user(user, remember=remember) # Sau khi qua hết thì đăng nhập user
     return redirect(url_for('main.profile'))  # Chuyển hướng sau khi xác thực bằng khuôn mặt
 
-# @auth.route('/register_cam', methods=['POST', 'GET'])
-# @login_required
-# def register_cam():
-#     # initialize the camera 
-#     # If you have multiple camera connected with  
-#     # current device, assign a value in cam_port  
-#     # variable according to that 
-#     cam_port = 0
-#     cam = cv2.VideoCapture(cam_port) 
-  
-#     # reading the input using the camera 
-#     result, image = cam.read() 
-  
-#     # If image will detected without any error,  
-#     # show result 
-#     print("CAM IS RUNNING")
-#     if result: 
-#         return render_template('register_cam.html', image_url = image)
-        
-#     # If captured image is corrupted, moving to else part 
-#     else: 
-#         print("No image detected. Please! try again") 
-
-#     return render_template('register_cam.html')
 
 @auth.route('/register_cam')
 @login_required
@@ -218,3 +194,59 @@ def register_cam_post():
         print('Vui lòng trong facecam chỉ chứa duy nhất một khuôn mặt!')
 
     return redirect(url_for('auth.register_cam'))
+
+
+@auth.route('/login_cam')
+def login_cam():
+    return render_template('login_cam.html')
+
+@auth.route('/login_cam', methods=['POST'])
+def login_cam_post():
+    
+    # Nhận dữ liệu hình ảnh từ yêu cầu POST
+    image_url = request.json['image']
+    
+    email = request.json['email']
+    
+    remember = True if request.json['remember'] else False  
+    
+    
+    # Loại bỏ phần đầu của chuỗi dữ liệu URL (prefix "data:image/jpeg;base64,")
+    img_data = image_url.split(',')[1]
+
+    # Chuyển đổi dữ liệu hình ảnh từ base64 sang binary
+    binary_data = base64.b64decode(img_data)
+
+    jpg_as_np = np.frombuffer(binary_data, dtype=np.uint8)    
+    image = cv2.imdecode(jpg_as_np, flags=1)
+
+
+    user = User.query.filter_by(email=email).first() # kiểm tra tài khoản trong database qua email
+        
+    if not user: # nếu tìm ra người dùng thì quay về trang signup dùng gmail khác
+        flash('Xác thực bằng khuôn mặt không thành công. Vui lòng kiểm tra lại thông tin đăng nhập.')
+        print('Xác thực bằng khuôn mặt không thành công. Vui lòng kiểm tra lại thông tin đăng nhập.')
+        return redirect(url_for('auth.login_cam'))
+
+    # if not uploaded_image:# kiểm tra có hình chưa
+    #     flash('Vui lòng tải lên một ảnh.', 'danger')
+    #     print('Vui lòng tải lên một ảnh.')
+    #     return redirect(url_for('auth.login_cam'))
+
+    face_locations = face_recognition.face_locations(image)
+
+    if len(face_locations) != 1:
+        flash('Vui lòng tải lên một ảnh chứa duy nhất một khuôn mặt.', 'danger')
+        print('Vui lòng tải lên một ảnh chứa duy nhất một khuôn mặt.')
+        return redirect(url_for('auth.login_cam'))
+    face_encoding = face_recognition.face_encodings(image)[0]
+    
+    if user.face_encoding is None or not face_recognition.compare_faces([user.face_encoding], face_encoding)[0]:
+        flash('Xác thực bằng khuôn mặt không thành công. Vui lòng kiểm tra lại thông tin đăng nhập.', 'danger')
+        print('Xác thực bằng khuôn mặt không thành công. Vui lòng kiểm tra lại thông tin đăng nhập.')
+        return redirect(url_for('auth.login_cam'))
+        
+    login_user(user, remember=remember) # Sau khi qua hết thì đăng nhập user
+    return redirect(url_for('main.profile'))  # Chuyển hướng sau khi xác thực bằng khuôn mặt
+
+
