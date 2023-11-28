@@ -84,8 +84,14 @@ def register_face():
 @auth.route('/register_face', methods=['POST'])
 @login_required
 def register_face_post():
-    uploaded_image = request.files['image']
     user = User.query.filter_by(id=current_user.get_id()).first()
+    password = request.form.get('password')
+    
+    if not check_password_hash(user.password, password):
+        flash('Mật khẩu không đúng!', 'danger')
+        return redirect(url_for('auth.register_face'))
+    
+    uploaded_image = request.files['image']
 
     if uploaded_image:# kiểm tra có hình chưa
         image = face_recognition.load_image_file(uploaded_image)
@@ -156,6 +162,13 @@ def register_cam():
 @auth.route('/register_cam', methods=['POST'])
 @login_required
 def register_cam_post():
+    user = User.query.filter_by(id=current_user.get_id()).first()
+    password = request.json['password']
+    
+    if not check_password_hash(user.password, password):
+        flash('Mật khẩu không đúng!', 'danger')
+        return redirect(url_for('auth.register_cam'))
+    
     # Nhận dữ liệu hình ảnh từ yêu cầu POST
     data_url = request.json['image']
 
@@ -170,9 +183,6 @@ def register_cam_post():
     
     image = cv2.imdecode(jpg_as_np, flags=1)
     face_locations = face_recognition.face_locations(image)
-
-    user = User.query.filter_by(id=current_user.get_id()).first()
-    print(image)
 
     if len(face_locations) == 1:  # Chỉ xử lý ảnh có một khuôn mặt
         face_encoding = face_recognition.face_encodings(image)[0]
@@ -246,7 +256,9 @@ def login_cam_post():
         print('Xác thực bằng khuôn mặt không thành công. Vui lòng kiểm tra lại thông tin đăng nhập.')
         return redirect(url_for('auth.login_cam'))
         
+    
     login_user(user, remember=remember) # Sau khi qua hết thì đăng nhập user
+    print('Đăng nhập khuôn mặt thành công.')
     return redirect(url_for('main.profile'))  # Chuyển hướng sau khi xác thực bằng khuôn mặt
 
 
