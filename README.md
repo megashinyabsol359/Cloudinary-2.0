@@ -3,4 +3,4 @@
 - Link Cloudinary: https://cloudinary.com
 
 # TO-DO LIST:
-- Làm Project Plan hoàn chỉnh
+- Cook toàn bộ phần còn lại của code :D
