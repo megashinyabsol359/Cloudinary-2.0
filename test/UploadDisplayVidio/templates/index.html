@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Upload</title>
+</head>
+<body>
+    <h1>Video Upload and Display</h1>
+
+    <form method="POST" action="/upload" enctype="multipart/form-data">
+        <input type="file" name="video" accept="video/*" required>
+        <button type="submit">Upload Video</button>
+    </form>
+
+    {% if video_filename %}
+        <h2>Uploaded Video:</h2>
+        <video width="640" height="360" controls>
+            <source src="{{ url_for('static', filename=video_filename) }}" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>
+    {% endif %}
+</body>
+</html>
