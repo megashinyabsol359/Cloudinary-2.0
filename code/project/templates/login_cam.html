@@ -5,30 +5,28 @@
     <h3 class="title">Login</h3>
     <div class="box">
 
-        {% with messages = get_flashed_messages() %}
-        {% if messages %}
-            <div class="notification is-danger">
-                {{ messages[0] }}
-            </div>
-        {% endif %}
-        {% endwith %}
+        {% if error%}
+        <div class="notification is-danger">
+            {{error}}
+        </div>
+        {% endif%}
+    
 
-
-            <div class="field">
-                <div class="control">
-                    <input class="input is-large" id="email" type="email" name="email" placeholder="Email của bạn" autofocus="">
-                </div>
+        <div class="field">
+            <div class="control">
+                <input class="input is-large" id="email" type="email" name="email" placeholder="Email của bạn" autofocus="">
             </div>
-            
-            <video id="video" width="640" height="480" autoplay></video>
-            <canvas id="canvas" width="320" height="240"></canvas>
-            
-            <div class="field">
-                <label class="checkbox">
-                    <input type="checkbox" id="remember" name="remember">
-                    Remember me
-                </label>
-            </div>
+        </div>
+        
+        <video id="video" width="640" height="480" autoplay></video>
+        <canvas id="canvas" width="384" height="212"></canvas>
+        
+        <div class="field">
+            <label class="checkbox">
+                <input type="checkbox" id="remember" name="remember">
+                Remember me
+            </label>
+        </div>
 
         
 
@@ -36,10 +34,11 @@
         <a href="{{ url_for('auth.login') }}" class="button is-block is-info is-large is-fullwidth">
             Quay về đăng nhập bằng mật khẩu
         </a>        
-        <button onclick="startCamera()" type="button">Start Camera</button>
-        <button onclick="captureImage()" type="submit">Capture Image</button>
+        <button onclick="captureImage()" type="button">Capture Image</button>
+        <button onclick="sendImage()" type="submit">Send Image</button>
 
         <script>
+            startCamera();
             let videoStream;
         
             function startCamera() {
@@ -57,6 +56,9 @@
         
             function captureImage() {
                 canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+            }
+
+                function sendImage() {
                 let image_data_url = canvas.toDataURL('image/jpeg');
 
                 let email_data_url = document.getElementById('email').value;
@@ -78,9 +80,9 @@
                     }),
                 })
                 .then(response => {         
-                    response.json();
+                    //response.json();
                     if(response.redirected){
-                        window.location.href = response.url;
+                        window.location = response.url;
                     }
                 })
                 .then(data => {

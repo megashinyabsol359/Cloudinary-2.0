@@ -153,11 +153,12 @@ def login_face_post():
     login_user(user, remember=remember) # Sau khi qua hết thì đăng nhập user
     return redirect(url_for('main.profile'))  # Chuyển hướng sau khi xác thực bằng khuôn mặt
 
-
 @auth.route('/register_cam')
 @login_required
 def register_cam():
-    return render_template('register_cam.html')
+    error = request.args.get('error')
+    print(error)
+    return render_template('register_cam.html',error=error)
 
 @auth.route('/register_cam', methods=['POST'])
 @login_required
@@ -166,8 +167,8 @@ def register_cam_post():
     password = request.json['password']
     
     if not check_password_hash(user.password, password):
-        flash('Mật khẩu không đúng!', 'danger')
-        return redirect(url_for('auth.register_cam'))
+        error = 'Mật khẩu không đúng!'
+        return redirect(url_for('auth.register_cam', error=error))
     
     # Nhận dữ liệu hình ảnh từ yêu cầu POST
     data_url = request.json['image']
@@ -196,19 +197,21 @@ def register_cam_post():
         user.face_image = cv2.imencode('.jpg', face_image)[1].tobytes()  # Chuyển hình ảnh thành dữ liệu nhị phân
 
         db.session.commit()
-        flash('Đăng ký khuôn mặt thành công!', 'success')
+        error = 'Đăng ký khuôn mặt thành công!'
         print('Đăng ký khuôn mặt thành công!')
-        return redirect(url_for('auth.register_cam'))
+        return redirect(url_for('auth.register_cam', error=error))
     else:
-        flash('Vui lòng trong facecam chỉ chứa duy nhất một khuôn mặt.', 'danger')
+        error = 'Vui lòng trong facecam chỉ chứa duy nhất một khuôn mặt.'
         print('Vui lòng trong facecam chỉ chứa duy nhất một khuôn mặt!')
 
-    return redirect(url_for('auth.register_cam'))
+    return redirect(url_for('auth.register_cam', error=error))
 
 
 @auth.route('/login_cam')
 def login_cam():
-    return render_template('login_cam.html')
+    error = request.args.get('error')
+    print(error)
+    return render_template('login_cam.html',error=error)
 
 @auth.route('/login_cam', methods=['POST'])
 def login_cam_post():
@@ -236,7 +239,8 @@ def login_cam_post():
     if not user: # nếu tìm ra người dùng thì quay về trang signup dùng gmail khác
         flash('Xác thực bằng khuôn mặt không thành công. Vui lòng kiểm tra lại thông tin đăng nhập.')
         print('Xác thực bằng khuôn mặt không thành công. Vui lòng kiểm tra lại thông tin đăng nhập.')
-        return redirect(url_for('auth.login_cam'))
+        error = 'Xác thực bằng khuôn mặt không thành công. Vui lòng kiểm tra lại thông tin đăng nhập.'
+        return redirect(url_for('auth.login_cam', error=error))
 
     # if not uploaded_image:# kiểm tra có hình chưa
     #     flash('Vui lòng tải lên một ảnh.', 'danger')
@@ -248,13 +252,15 @@ def login_cam_post():
     if len(face_locations) != 1:
         flash('Vui lòng tải lên một ảnh chứa duy nhất một khuôn mặt.', 'danger')
         print('Vui lòng tải lên một ảnh chứa duy nhất một khuôn mặt.')
-        return redirect(url_for('auth.login_cam'))
+        error = 'Vui lòng tải lên một ảnh chứa duy nhất một khuôn mặt.'
+        return redirect(url_for('auth.login_cam', error=error))
     face_encoding = face_recognition.face_encodings(image)[0]
     
     if user.face_encoding is None or not face_recognition.compare_faces([user.face_encoding], face_encoding)[0]:
         flash('Xác thực bằng khuôn mặt không thành công. Vui lòng kiểm tra lại thông tin đăng nhập.', 'danger')
         print('Xác thực bằng khuôn mặt không thành công. Vui lòng kiểm tra lại thông tin đăng nhập.')
-        return redirect(url_for('auth.login_cam'))
+        error = 'Xác thực bằng khuôn mặt không thành công. Vui lòng kiểm tra lại thông tin đăng nhập.'
+        return redirect(url_for('auth.login_cam', error=error))
         
     
     login_user(user, remember=remember) # Sau khi qua hết thì đăng nhập user

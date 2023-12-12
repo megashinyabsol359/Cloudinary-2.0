@@ -4,21 +4,20 @@
 <div class="column is-4 is-offset-4">
     <h3 class="title">Tạo Face ID bằng facecam</h3>
     <div class="box">
-        {% with messages = get_flashed_messages() %}
-        {% if messages %}
-            <div class="notification is-danger">
-                {{ messages[0] }}
-            </div>
-        {% endif %}
-        {% endwith %}
+
+        {% if error%}
+        <div class="notification is-danger">
+            {{error}}
+        </div>
+        {% endif%}
 
         <input class="input is-large" id="password" type="password" name="password" placeholder="Your Password" required>
         <video id="video" width="640" height="480" autoplay></video>
-        <canvas id="canvas" width="320" height="240"></canvas>
-        <button onclick="startCamera()" type="button">Start Camera</button>
+        <canvas id="canvas" width="384" height="216"></canvas>
         <button onclick="captureImage()" type="button">Capture Image</button>
-        <button onclick="stopCamera()" type="button">Stop Camera</button>
+        <button onclick="sendImage()" type="button">Send Image</button>
         <script>
+            startCamera();
             let videoStream;
         
             function startCamera() {
@@ -36,12 +35,14 @@
         
             function captureImage() {
                 canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+            }
+        
+            function sendImage() {
                 let image_data_url = canvas.toDataURL('image/jpeg');
                 let password_url = document.getElementById('password').value;
         
                 // data url of the image
                 console.log(image_data_url);
-        
                 // Send the data URL to the server using a POST request
                 fetch('/register_cam', {
                     method: 'POST',
@@ -54,9 +55,9 @@
                     }),
                 })
                 .then(response => {
-                    response.json();
+                    //response.json();
                     if(response.redirected){
-                        window.location.href = response.url;
+                        window.location = response.url;
                     }
                 })
                 .then(data => {
@@ -65,15 +66,6 @@
                 .catch(error => {
                     console.error('Error capturing and sending image:', error);
                 });
-        
-            }
-        
-            function stopCamera() {
-                if (videoStream) {
-                    let tracks = videoStream.getTracks();
-                    tracks.forEach(track => track.stop());
-                    document.getElementById('video').srcObject = null;
-                }
             }
         </script>        
     </div>
