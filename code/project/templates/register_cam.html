@@ -42,22 +42,6 @@
                 // data url of the image
                 console.log(image_data_url);
         
-                // // Send the data URL to the server using a POST request
-                // fetch('/takeimage', {
-                //     method: 'POST',
-                //     headers: {
-                //         'Content-Type': 'application/json',
-                //     },
-                //     body: JSON.stringify({ image: image_data_url }),
-                // })
-                // .then(response => response.json())
-                // .then(data => {
-                //     console.log('Image captured and sent to server:', data);
-                // })
-                // .catch(error => {
-                //     console.error('Error capturing and sending image:', error);
-                // });
-        
                 // Send the data URL to the server using a POST request
                 fetch('/register_cam', {
                     method: 'POST',
