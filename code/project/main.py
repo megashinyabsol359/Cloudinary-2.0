@@ -5,7 +5,7 @@ from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileRequired, FileAllowed
 from wtforms import SubmitField
 from . import db
-from . import opencv
+from . import imgedit
 
 import base64
 import os
@@ -65,12 +65,12 @@ def RGBtoGray():
     if form.validate_on_submit():
         filename = photos.save(form.photo.data)
         file_url = url_for('main.get_file', filename=filename)
-        gray_filename = opencv.RGBtoGray(filename, file_url)
+        gray_filename = imgedit.RGBtoGray(filename, file_url)
         gray_file_url = url_for('main.get_file', filename=gray_filename)
     else:
         file_url = None
         gray_file_url = None
-    return render_template('RGBtoGray.html', form = form, file_url = file_url, gray_file_url = gray_file_url)
+    return render_template('imgedit_RGBtoGray.html', form = form, file_url = file_url, gray_file_url = gray_file_url)
 
 @main.route('/face_detection', methods = ['GET', 'POST'])
 @login_required
@@ -79,9 +79,92 @@ def face_detection():
     if form.validate_on_submit():
         filename = photos.save(form.photo.data)
         file_url = url_for('main.get_file', filename=filename)
-        face_filename = opencv.face_detection(filename, file_url)
+        face_filename = imgedit.face_detection(filename, file_url)
         face_file_url = url_for('main.get_file', filename=face_filename)
     else:
         file_url = None
         face_file_url = None
-    return render_template('face_detection.html', form = form, file_url = file_url, face_file_url = face_file_url)
+    return render_template('imgedit_face_detection.html', form = form, file_url = file_url, face_file_url = face_file_url)
+
+@main.route('/crop', methods = ['GET', 'POST'])
+@login_required
+def crop():
+    form = UploadForm()
+    if form.validate_on_submit():
+        x1 = int(request.form.get('x1'))
+        x2 = int(request.form.get('x2'))
+        y1 = int(request.form.get('y1'))
+        y2 = int(request.form.get('y2'))
+        filename = photos.save(form.photo.data)
+        file_url = url_for('main.get_file', filename=filename)
+        face_filename = imgedit.crop(filename, file_url, x1, x2, y1, y2)
+        face_file_url = url_for('main.get_file', filename=face_filename)
+    else:
+        file_url = None
+        face_file_url = None
+    print(file_url)
+    return render_template('imgedit_crop.html', form = form, file_url = file_url, face_file_url = face_file_url)
+
+@main.route('/rotate', methods = ['GET', 'POST'])
+@login_required
+def rotate():
+    form = UploadForm()
+    if form.validate_on_submit():
+        degree = int(request.form.get('degree'))
+        x = int(request.form.get('x'))
+        y = int(request.form.get('y'))
+        filename = photos.save(form.photo.data)
+        file_url = url_for('main.get_file', filename=filename)
+        face_filename = imgedit.rotate(filename, file_url, degree, x, y)
+        face_file_url = url_for('main.get_file', filename=face_filename)
+    else:
+        file_url = None
+        face_file_url = None
+    return render_template('imgedit_rotate.html', form = form, file_url = file_url, face_file_url = face_file_url)
+
+@main.route('/resize', methods = ['GET', 'POST'])
+@login_required
+def resize():
+    form = UploadForm()
+    if form.validate_on_submit():
+        size = int(request.form.get('size'))
+        filename = photos.save(form.photo.data)
+        file_url = url_for('main.get_file', filename=filename)
+        face_filename = imgedit.resize(filename, file_url, size)
+        face_file_url = url_for('main.get_file', filename=face_filename)
+    else:
+        file_url = None
+        face_file_url = None
+    return render_template('imgedit_resize.html', form = form, file_url = file_url, face_file_url = face_file_url)
+
+@main.route('/resize', methods = ['GET', 'POST'])
+@login_required
+def hsv():
+    form = UploadForm()
+    if form.validate_on_submit():
+        h = int(request.form.get('hue'))
+        s = int(request.form.get('saturation'))
+        l = int(request.form.get('light'))
+        filename = photos.save(form.photo.data)
+        file_url = url_for('main.get_file', filename=filename)
+        face_filename = imgedit.hsv(filename, file_url, h, s, l)
+        face_file_url = url_for('main.get_file', filename=face_filename)
+    else:
+        file_url = None
+        face_file_url = None
+    return render_template('imgedit_resize.html', form = form, file_url = file_url, face_file_url = face_file_url)
+
+
+# @main.route('/effect_tools', methods = ['GET', 'POST'])
+# @login_required
+# def effect_tools():
+#     form = UploadForm()
+#     if form.validate_on_submit():
+#         filename = photos.save(form.photo.data)
+#         file_url = url_for('main.get_file', filename=filename)
+#         face_filename = imgedit.effect_tools(filename, file_url)
+#         face_file_url = url_for('main.get_file', filename=face_filename)
+#     else:
+#         file_url = None
+#         face_file_url = None
+#     return render_template('effect_tools.html', form = form, file_url = file_url, face_file_url = face_file_url)

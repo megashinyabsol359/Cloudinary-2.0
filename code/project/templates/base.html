@@ -24,24 +24,29 @@
                             <a href="{{ url_for('main.profile') }}" class="navbar-item">
                                 Profile
                             </a>
+                            <a href="{{ url_for('main.crop') }}" class="navbar-item">
+                                Crop
+                            </a>
+                            <a href="{{ url_for('main.rotate') }}" class="navbar-item">
+                                Rotate
+                            </a>
                             <a href="{{ url_for('main.RGBtoGray') }}" class="navbar-item">
                                 RGBtoGray
                             </a>
                             <a href="{{ url_for('main.face_detection') }}" class="navbar-item">
                                 Face Detection
                             </a>
+                            <a href="{{ url_for('auth.logout') }}" class="navbar-item">
+                                Logout
+                            </a>
                             {% endif %}
+                            
                             {% if not current_user.is_authenticated %}
                             <a href="{{ url_for('auth.login') }}" class="navbar-item">
                                 Login
                             </a>
                             <a href="{{ url_for('auth.signup') }}" class="navbar-item">
                                 Sign Up
-                            </a>
-                            {% endif %}
-                            {% if current_user.is_authenticated %}
-                            <a href="{{ url_for('auth.logout') }}" class="navbar-item">
-                                Logout
                             </a>
                             {% endif %}
                         </div>
