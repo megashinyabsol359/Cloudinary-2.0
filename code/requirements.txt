@@ -1,0 +1,13 @@
+Flask
+Flask-Reuploaded
+Flask-WTF
+Flask-SQLAlchemy
+Flask-Login
+Flask-SocketIO
+opencv-python
+Werkzeug
+WTForms
+face_recognition
+setuptools
+Flask-Cors
+moviepy
