@@ -19,7 +19,7 @@
         </div>
         
         <video id="video" width="640" height="480" autoplay></video>
-        <canvas id="canvas" width="384" height="212"></canvas>
+        <canvas id="canvas"></canvas>
         
         <div class="field">
             <label class="checkbox">
@@ -55,6 +55,9 @@
             }
         
             function captureImage() {
+                canvas.width = 384;
+                canvas.height = canvas.width * video.videoHeight / video.videoWidth;
+                canvas.style.transform = 'scale(-1, 1)';
                 canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
             }
 
