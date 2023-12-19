@@ -13,7 +13,7 @@
 
         <input class="input is-large" id="password" type="password" name="password" placeholder="Your Password" required>
         <video id="video" width="640" height="480" autoplay></video>
-        <canvas id="canvas" width="384" height="216"></canvas>
+        <canvas id="canvas"></canvas>
         <button onclick="captureImage()" type="button">Capture Image</button>
         <button onclick="sendImage()" type="button">Send Image</button>
         <script>
@@ -34,6 +34,9 @@
             }
         
             function captureImage() {
+                canvas.width = 384;
+                canvas.height = canvas.width * video.videoHeight / video.videoWidth;
+                canvas.style.transform = 'scale(-1, 1)';
                 canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
             }
         
