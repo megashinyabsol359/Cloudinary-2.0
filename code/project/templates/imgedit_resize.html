@@ -25,16 +25,6 @@
                         <input type="number" onkeydown="if(event.key==='.'){event.preventDefault();}"  oninput="event.target.value = event.target.value.replace(/[^0-9]*/g,'');" class="input is-large" name="size" placeholder="Size bao nhieu %?">
                     </div>
                 </div>
-                <div class="field">
-                    <div class="control">
-                        <input type="number" onkeydown="if(event.key==='.'){event.preventDefault();}"  oninput="event.target.value = event.target.value.replace(/[^0-9]*/g,'');" class="input is-large" name="x" placeholder="Diem xoay x">
-                    </div>
-                </div>
-                <div class="field">
-                    <div class="control">
-                        <input type="number" onkeydown="if(event.key==='.'){event.preventDefault();}"  oninput="event.target.value = event.target.value.replace(/[^0-9]*/g,'');" class="input is-large" name="y" placeholder="Diem xoay y">
-                    </div>
-                </div>
                 <div>
                     <button class="button is-block is-info is-large is-fullwidth">
                         {{ form.submit(class="btn btn-success") }}
@@ -46,7 +36,7 @@
 </div>
 {% if file_url %}
     <img src="{{ file_url }}" style="width: 400px;">
-    <img src="{{ gray_file_url }}" style="width: 400px;">
+    <img src="{{ resize_file_url }}" style="width: 400px;">
 {% endif %}
 
 {% endblock %}
