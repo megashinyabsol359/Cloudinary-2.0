@@ -107,7 +107,7 @@ def crop():
         file_url = None
         face_file_url = None
     print(file_url)
-    return render_template('imgedit_crop.html', form = form, file_url = file_url, face_file_url = face_file_url)
+    return render_template('imgedit_crop.html', form = form, file_url = file_url, crop_file_url = face_file_url)
 
 @main.route('/rotate', methods = ['GET', 'POST'])
 @login_required
@@ -124,7 +124,7 @@ def rotate():
     else:
         file_url = None
         face_file_url = None
-    return render_template('imgedit_rotate.html', form = form, file_url = file_url, face_file_url = face_file_url)
+    return render_template('imgedit_rotate.html', form = form, file_url = file_url, rotate_file_url = face_file_url)
 
 @main.route('/resize', methods = ['GET', 'POST'])
 @login_required
@@ -139,9 +139,9 @@ def resize():
     else:
         file_url = None
         face_file_url = None
-    return render_template('imgedit_resize.html', form = form, file_url = file_url, face_file_url = face_file_url)
+    return render_template('imgedit_resize.html', form = form, file_url = file_url, resize_file_url = face_file_url)
 
-@main.route('/resize', methods = ['GET', 'POST'])
+@main.route('/hsv', methods = ['GET', 'POST'])
 @login_required
 def hsv():
     form = UploadForm()
