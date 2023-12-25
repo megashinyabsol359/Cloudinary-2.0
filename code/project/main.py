@@ -165,27 +165,18 @@ def hsv():
 
 
 
-@main.route('/trim_video', methods = ['GET', 'POST'])
+def trim_video_function(videofile, start_time, end_time, trimmed_filename):
+    clip = VideoFileClip(os.path.join(current_app.config["UPLOAD_FOLDER"], videofile))
+    trimmed_filename_with_extension = f"{trimmed_filename}.mp4"
+    trimpath = os.path.join(current_app.config["UPLOAD_FOLDER"], trimmed_filename_with_extension)
+    trimmed_clip = clip.subclip(start_time, end_time)
+    trimmed_clip.write_videofile(trimpath)
+    return trimpath
+
+@main.route('/trim_video', methods=['GET', 'POST'])
 def trim_video():
-    return render_template('trim_video.html')
-
-@main.route('/uploads', methods=['GET'])
-def get_uploaded_videos():
     uploaded_videos = [filename for filename in os.listdir(current_app.config["UPLOAD_FOLDER"])]
-    return jsonify(uploaded_videos)
-
-@main.route('/clips/<filename>')
-def render_clip(filename):
-    return send_file(os.path.join(current_app.config["UPLOAD_FOLDER"], filename))
-
-@main.route('/playback/<filename>')
-def playback(filename):
-    video_path = os.path.join(current_app.config["UPLOAD_FOLDER"], filename)
-
-    # You may want to add additional security checks here before sending the file
-    # For example, check user authentication, permissions, etc.
-
-    return send_file(video_path)
+    return render_template('trim_video.html', uploaded_videos=uploaded_videos)
 
 @main.route('/upload_video', methods=['POST'])
 def upload_video():
@@ -204,29 +195,29 @@ def upload_video():
 def trim_video_edit():
     try:
         videofile = request.json['videofile']
+        
+        # Kiểm tra xem videofile có giá trị không
+        if videofile is None:
+            raise ValueError("Videofile is not provided")
+
         trim_start = int(request.json['trim_start'])
         trim_end = int(request.json['trim_end'])
         trimmed_filename = request.json['trimmed_filename']
 
-        # Append the video extension (e.g., ".mp4") to the filename
-        trimmed_filename_with_extension = f"{trimmed_filename}.mp4"
-
-        edited_videopath = trim_video_function(videofile, trim_start, trim_end, trimmed_filename_with_extension)
+        trimmed_videopath = trim_video_function(videofile, trim_start, trim_end, trimmed_filename)
         return {
             "status": "success",
-            "message": "video edit success",
-            "edited_videopath": edited_videopath
+            "message": "Video edited successfully",
+            "trimmed_videopath": trimmed_videopath
         }
     except Exception as e:
         return {
             "status": "error",
-            "message": "video edit failure: " + str(e),
+            "message": "Video edit failure: " + str(e),
         }
 
-def trim_video_function(videofile, start_time, end_time, trimmed_filename):
-    clip = VideoFileClip(os.path.join(current_app.config["UPLOAD_FOLDER"], videofile))
-    trimmed_filename_with_extension = f"{trimmed_filename}"
-    trimpath = os.path.join(current_app.config["UPLOAD_FOLDER"], trimmed_filename_with_extension)
-    trimmed_clip = clip.subclip(start_time, end_time)
-    trimmed_clip.write_videofile(trimpath)
-    return trimpath
+
+@main.route('/playback/<filename>')
+def playback(filename):
+    video_path = os.path.join(current_app.config["UPLOAD_FOLDER"], filename)
+    return send_file(video_path)
