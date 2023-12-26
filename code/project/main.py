@@ -226,3 +226,19 @@ def trim_video_edit():
 def playback(filename):
     video_path = os.path.join(current_app.config["UPLOAD_FOLDER"], filename)
     return send_file(video_path)
+
+@main.route('/object_detection', methods = ['GET', 'POST'])
+@login_required
+def object_detection():
+    form = UploadForm()
+    if form.validate_on_submit():
+        filename = photos.save(form.photo.data)
+        file_url = url_for('main.get_file', filename=filename)
+        gray_filename = imgedit.object_detection(filename, file_url)
+        gray_file_url = url_for('main.get_file', filename=gray_filename)
+        print(file_url)
+        print(gray_file_url)        
+    else:
+        file_url = None
+        gray_file_url = None
+    return render_template('imgedit_RGBtoGray.html', form = form, file_url = "/uploads/aimi_4.png", gray_file_url = "/uploads/test/aimi.png")

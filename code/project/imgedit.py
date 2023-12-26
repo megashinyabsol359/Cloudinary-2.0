@@ -1,5 +1,6 @@
 import os
 import cv2
+import torch
 
 def RGBtoGray(file, file_url):
     path = os.getcwd() + file_url
@@ -111,3 +112,24 @@ def hsv(file, file_url, h, s, v):
     cv2.imwrite(face_file_url, hsv)
 
     return face_filename
+
+
+
+def object_detection(file, file_url):
+    path = os.getcwd() + file_url
+    img = cv2.imread(path)
+    img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+    
+    model = torch.hub.load('ultralytics/yolov5', 'yolov5s', pretrained=True)  # force_reload = recache latest code
+    model.eval()
+    results = model([img])
+    results.render()  # updates results.imgs with boxes and labels
+
+    filename, extension = os.path.splitext(file)
+    gray_filename = filename + '_object_detection'
+    gray_file_url = os.path.dirname(path) + '/' + gray_filename
+
+    results.save(save_dir=gray_file_url)
+    #cv2.imwrite(gray_file_url, results.imgs[0])
+
+    return gray_filename + '/image0.jpg'
