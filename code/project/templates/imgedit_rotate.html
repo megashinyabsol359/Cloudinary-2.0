@@ -16,6 +16,7 @@
         
             <div class="row">
                 <div>
+                    <!-- Thay đổi nút Upload thành Xem kết quả -->
                     <button class="button is-block is-info is-large is-fullwidth">
                         {{ form.photo(class="form-control") }}
                     </button>                  
@@ -36,17 +37,26 @@
                     </div>
                 </div>
                 <div>
-                    <button class="button is-block is-info is-large is-fullwidth">
-                        {{ form.submit(class="btn btn-success") }}
-                    </button>                 
+                    <!-- Thêm nút để tải về ảnh sau khi xoay -->
+                    <button class="button is-block is-success is-large is-fullwidth" onclick="downloadRotatedImage()">
+                        Tải về ảnh đã xoay
+                    </button>
                 </div>
             </div>
         </form>
     </div>
 </div>
+
 {% if file_url %}
     <img src="{{ file_url }}" style="width: 400px;">
     <img src="{{ rotate_file_url }}" style="width: 400px;">
 {% endif %}
+
+<script>
+    function downloadRotatedImage() {
+        // Thực hiện tải về ảnh sau khi xoay
+        window.location.href = "{{ rotate_file_url }}";
+    }
+</script>
 
 {% endblock %}

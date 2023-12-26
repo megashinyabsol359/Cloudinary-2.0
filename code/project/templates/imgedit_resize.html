@@ -28,15 +28,21 @@
                 <div>
                     <button class="button is-block is-info is-large is-fullwidth">
                         {{ form.submit(class="btn btn-success") }}
-                    </button>                 
+                    </button>
                 </div>
             </div>
         </form>
     </div>
 </div>
+
 {% if file_url %}
     <img src="{{ file_url }}" style="width: 400px;">
     <img src="{{ resize_file_url }}" style="width: 400px;">
+
+    <!-- Add a button to download the resized image -->
+    <a href="{{ resize_file_url }}" download="resized_image.jpg" class="button is-block is-success is-large is-fullwidth">
+        Download Resized Image
+    </a>
 {% endif %}
 
 {% endblock %}

@@ -16,22 +16,30 @@
         
             <div class="row">
                 <div>
+                    <!-- Thay đổi nút Upload thành Xem kết quả -->
                     <button class="button is-block is-info is-large is-fullwidth">
                         {{ form.photo(class="form-control") }}
+                        Xem kết quả
                     </button>                  
                 </div>     
                 <div>
                     <button class="button is-block is-info is-large is-fullwidth">
                         {{ form.submit(class="btn btn-success") }}
-                    </button>                 
+                    </button>
                 </div>
             </div>
         </form>
     </div>
 </div>
+
 {% if file_url %}
     <img src="{{ file_url }}" style="width: 400px;">
     <img src="{{ gray_file_url }}" style="width: 400px;">
+
+    <!-- Thêm nút để tải về ảnh Grayscale -->
+    <a href="{{ gray_file_url }}" download="grayscale_image.jpg" class="button is-block is-success is-large is-fullwidth">
+        Tải về ảnh Grayscale
+    </a>
 {% endif %}
 
 {% endblock %}
