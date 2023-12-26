@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 
 {% block content %}
+<div class="column is-4 is-offset-4">
     <!-- Upload Video Section -->
     <h1>Video Editor - Upload</h1>
 
@@ -42,11 +43,12 @@
         <video id="trimmed-video" controls style="width: 320px; height: 240px;">
             Your browser does not support the video tag.
         </video>
+        <!-- Download button for the trimmed video -->
+        <button id="download-button" onclick="downloadTrimmedVideo()" disabled>Download Trimmed Video</button>
     </div>
 
     <!-- Play button for the trimmed video -->
     <button id="play-button" onclick="playTrimmedVideo()" disabled>Play Trimmed Video</button>
-
     <script>
         function trimVideo() {
             const trimForm = document.getElementById('trim-form');
@@ -78,6 +80,7 @@
                     trimmedVideo.src = data.trimmed_videopath;
                     trimmedVideoContainer.style.display = 'block';
                     document.getElementById('play-button').disabled = false;
+                    document.getElementById('download-button').disabled = false;
                 }
             });
         }
@@ -85,6 +88,24 @@
         function playTrimmedVideo() {
             const trimmedVideo = document.getElementById('trimmed-video');
             trimmedVideo.play();
+        }
+
+        function downloadTrimmedVideo() {
+            const trimmedVideo = document.getElementById('trimmed-video');
+            const downloadButton = document.getElementById('download-button');
+
+            // Create a temporary anchor element
+            const downloadLink = document.createElement('a');
+            downloadLink.href = trimmedVideo.src;
+            downloadLink.download = 'trimmed_video.mp4'; // You can set the default filename here
+
+            // Trigger a click on the anchor element
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+            document.body.removeChild(downloadLink);
+
+            // Disable the download button after clicking
+            downloadButton.disabled = true;
         }
 
         // Update the upload form to handle the response
@@ -121,4 +142,5 @@
             });
         });
     </script>
+</div>
 {% endblock %}
