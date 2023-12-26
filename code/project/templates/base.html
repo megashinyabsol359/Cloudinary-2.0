@@ -7,6 +7,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Flask Auth Example</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.2/css/bulma.min.css" />
+    <style>
+        .navbar-item.has-dropdown.is-hoverable .navbar-link {
+            color: white !important;
+        }
+
+        .navbar-item.has-dropdown.is-hoverable .navbar-dropdown a.navbar-item {
+            color: black !important;
+        }
+    </style>
 </head>
 
 <body>
@@ -24,15 +33,23 @@
                             <a href="{{ url_for('main.profile') }}" class="navbar-item">
                                 Profile
                             </a>
-                            <a href="{{ url_for('main.crop') }}" class="navbar-item">
-                                Crop
-                            </a>
-                            <a href="{{ url_for('main.rotate') }}" class="navbar-item">
-                                Rotate
-                            </a>
-                            <a href="{{ url_for('main.resize') }}" class="navbar-item">
-                                Resize
-                            </a>
+                            <div class="navbar-item has-dropdown is-hoverable">
+                                <a class="navbar-link">
+                                    Edit Image
+                                </a>
+                                <div class="navbar-dropdown">
+                                    <a href="{{ url_for('main.crop') }}" class="navbar-item">
+                                        Crop
+                                    </a>
+                                    <a href="{{ url_for('main.rotate') }}" class="navbar-item">
+                                        Rotate
+                                    </a>
+                                    <a href="{{ url_for('main.resize') }}" class="navbar-item">
+                                        Resize
+                                    </a>
+                                    <!-- Thêm các chức năng khác -->
+                                </div>
+                            </div>
                             <a href="{{ url_for('main.trim_video') }}" class="navbar-item">
                                 Trim
                             </a>
