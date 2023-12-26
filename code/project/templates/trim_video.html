@@ -1,122 +1,124 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h1>Video Editor</h1>
+    <!-- Upload Video Section -->
+    <h1>Video Editor - Upload</h1>
 
-<form action="/upload_video" method="post" enctype="multipart/form-data" id="upload-form">
-    <input type="file" name="videofile" accept="video/*" required>
-    <button type="submit">Upload Video</button>
-</form>
+    <form action="/upload_video" method="post" enctype="multipart/form-data" id="upload-form">
+        <input type="file" name="videofile" accept="video/*" required>
+        <button type="submit">Upload Video</button>
+    </form>
 
-<!-- Display a message when the video is uploaded -->
-<div id="upload-message" style="color: green;"></div>
+    <!-- Display a message when the video is uploaded -->
+    <div id="upload-message" style="color: green;"></div>
 
-<!-- Display the uploaded video -->
-<div id="uploaded-video-container" style="display: none;">
-    <h2>Uploaded Video:</h2>
-    <video id="uploaded-video" controls style="width: 320px; height: 240px;">
-        Your browser does not support the video tag.
-    </video>
-</div>
+    <!-- Display the uploaded video -->
+    <div id="uploaded-video-container" style="display: none;">
+        <h2>Uploaded Video:</h2>
+        <video id="uploaded-video" controls style="width: 320px; height: 240px;">
+            Your browser does not support the video tag.
+        </video>
+    </div>
 
-<h2>Trim Video:</h2>
-<form id="trim-form">
-    <label for="trim-start">Start Time (seconds):</label>
-    <input type="number" id="trim-start" name="trim-start" required><br>
+    <!-- Trim Video Section -->
+    <h1>Video Editor - Trim</h1>
 
-    <label for="trim-end">End Time (seconds):</label>
-    <input type="number" id="trim-end" name="trim-end" required><br>
+    <form id="trim-form">
+        <label for="trim-start">Start Time (seconds):</label>
+        <input type="number" id="trim-start" name="trim-start" required><br>
 
-    <label for="trimmed-filename">Trimmed File Name:</label>
-    <input type="text" id="trimmed-filename" name="trimmed-filename" required><br>
+        <label for="trim-end">End Time (seconds):</label>
+        <input type="number" id="trim-end" name="trim-end" required><br>
 
-    <button type="button" onclick="trimVideo()">Trim Video</button>
-</form>
+        <label for="trimmed-filename">Trimmed File Name:</label>
+        <input type="text" id="trimmed-filename" name="trimmed-filename" required><br>
 
-<!-- Video player container -->
-<div id="video-container" style="width: 320px; height: 240px; overflow: hidden;">
-    <!-- Video player element -->
-    <video id="video-player" controls style="width: 100%; height: 100%;">
-        Your browser does not support the video tag.
-    </video>
-</div>
+        <button type="button" onclick="trimVideo()">Trim Video</button>
+    </form>
 
-<!-- Play button for the selected video -->
-<button id="play-button" onclick="playTrimmedVideo()" disabled>Play Trimmed Video</button>
+    <!-- Trimmed Video Display Section -->
+    <div id="trimmed-video-container" style="display: none;">
+        <h2>Trimmed Video:</h2>
+        <video id="trimmed-video" controls style="width: 320px; height: 240px;">
+            Your browser does not support the video tag.
+        </video>
+    </div>
 
-<script>
-    function trimVideo() {
-        const trimForm = document.getElementById('trim-form');
-        const formData = new FormData(trimForm);
+    <!-- Play button for the trimmed video -->
+    <button id="play-button" onclick="playTrimmedVideo()" disabled>Play Trimmed Video</button>
 
-        // Lấy tên file video vừa được upload
-        const uploadedVideo = document.getElementById('uploaded-video');
-        const uploadedFileName = uploadedVideo.src.split('/').pop();
+    <script>
+        function trimVideo() {
+            const trimForm = document.getElementById('trim-form');
+            const formData = new FormData(trimForm);
 
-        fetch('/edit_video/trim', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                videofile: uploadedFileName,  // Sử dụng tên file đã upload
-                trim_start: formData.get('trim-start'),
-                trim_end: formData.get('trim-end'),
-                trimmed_filename: formData.get('trimmed-filename')
+            // Get the uploaded video file name
+            const uploadedVideo = document.getElementById('uploaded-video');
+            const uploadedFileName = uploadedVideo.src.split('/').pop();
+
+            fetch('/edit_video/trim', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    videofile: uploadedFileName,
+                    trim_start: formData.get('trim-start'),
+                    trim_end: formData.get('trim-end'),
+                    trimmed_filename: formData.get('trimmed-filename')
+                })
             })
-        })
-        .then(response => response.json())
-        .then(data => {
-            alert(data.message);
-            if (data.status === 'success') {
-                // Display the trimmed video
-                const videoContainer = document.getElementById('video-container');
-                const videoPlayer = document.getElementById('video-player');
-                videoPlayer.src = data.trimmed_videopath;
-                videoContainer.style.width = '320px'; // Set the desired width
-                videoContainer.style.height = '240px'; // Set the desired height
-                document.getElementById('play-button').disabled = false;
-            }
-        });
-    }
+            .then(response => response.json())
+            .then(data => {
+                alert(data.message);
+                if (data.status === 'success') {
+                    // Display the trimmed video
+                    const trimmedVideoContainer = document.getElementById('trimmed-video-container');
+                    const trimmedVideo = document.getElementById('trimmed-video');
+                    trimmedVideo.src = data.trimmed_videopath;
+                    trimmedVideoContainer.style.display = 'block';
+                    document.getElementById('play-button').disabled = false;
+                }
+            });
+        }
 
-    function playTrimmedVideo() {
-        const videoPlayer = document.getElementById('video-player');
-        videoPlayer.play();
-    }
-    
-    // Update the upload form to handle the response
-    const uploadForm = document.getElementById('upload-form');
-    const uploadMessage = document.getElementById('upload-message');
+        function playTrimmedVideo() {
+            const trimmedVideo = document.getElementById('trimmed-video');
+            trimmedVideo.play();
+        }
 
-    uploadForm.addEventListener('submit', function (event) {
-        event.preventDefault();
-        const formData = new FormData(uploadForm);
+        // Update the upload form to handle the response
+        const uploadForm = document.getElementById('upload-form');
+        const uploadMessage = document.getElementById('upload-message');
 
-        fetch('/upload_video', {
-            method: 'POST',
-            body: formData
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.filename) {
-                uploadMessage.style.color = 'green';
-                uploadMessage.textContent = `Video "${data.filename}" successfully uploaded!`;
+        uploadForm.addEventListener('submit', function (event) {
+            event.preventDefault();
+            const formData = new FormData(uploadForm);
 
-                // Display the uploaded video
-                const uploadedVideoContainer = document.getElementById('uploaded-video-container');
-                const uploadedVideo = document.getElementById('uploaded-video');
-                uploadedVideo.src = `/playback/${data.filename}`;
-                uploadedVideoContainer.style.display = 'block';
-            } else if (data.error) {
+            fetch('/upload_video', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.filename) {
+                    uploadMessage.style.color = 'green';
+                    uploadMessage.textContent = `Video "${data.filename}" successfully uploaded!`;
+
+                    // Display the uploaded video
+                    const uploadedVideoContainer = document.getElementById('uploaded-video-container');
+                    const uploadedVideo = document.getElementById('uploaded-video');
+                    uploadedVideo.src = `/playback/${data.filename}`;
+                    uploadedVideoContainer.style.display = 'block';
+                } else if (data.error) {
+                    uploadMessage.style.color = 'red';
+                    uploadMessage.textContent = `Error: ${data.error}`;
+                }
+            })
+            .catch(error => {
                 uploadMessage.style.color = 'red';
-                uploadMessage.textContent = `Error: ${data.error}`;
-            }
-        })
-        .catch(error => {
-            uploadMessage.style.color = 'red';
-            uploadMessage.textContent = `Error: ${error.message}`;
+                uploadMessage.textContent = `Error: ${error.message}`;
+            });
         });
-    });
-</script>
+    </script>
 {% endblock %}
