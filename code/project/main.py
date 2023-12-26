@@ -7,8 +7,6 @@ from wtforms import SubmitField
 from . import db
 from . import imgedit
 from . import videoedit
-from flask_cors import CORS
-from moviepy.editor import VideoFileClip
 
 import base64
 import os
