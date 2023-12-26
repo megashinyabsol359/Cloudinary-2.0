@@ -32,6 +32,11 @@
 {% if file_url %}
     <img src="{{ file_url }}" style="width: 400px;">
     <img src="{{ face_file_url }}" style="width: 400px;">
+
+    <!-- Add a button to download the resized image -->
+    <a href="{{ face_file_url }}" download="resized_image.jpg" class="button is-block is-success is-large is-fullwidth">
+        Tải ảnh nhận dạng mặt người
+    </a>
 {% endif %}
 
 {% endblock %}

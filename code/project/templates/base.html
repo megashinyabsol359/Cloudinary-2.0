@@ -47,17 +47,17 @@
                                     <a href="{{ url_for('main.resize') }}" class="navbar-item">
                                         Resize
                                     </a>
+                                    <a href="{{ url_for('main.RGBtoGray') }}" class="navbar-item">
+                                        RGBtoGray
+                                    </a>
+                                    <a href="{{ url_for('main.face_detection') }}" class="navbar-item">
+                                        Face Detection
+                                    </a>
                                     <!-- Thêm các chức năng khác -->
                                 </div>
                             </div>
                             <a href="{{ url_for('main.trim_video') }}" class="navbar-item">
                                 Trim
-                            </a>
-                            <a href="{{ url_for('main.RGBtoGray') }}" class="navbar-item">
-                                RGBtoGray
-                            </a>
-                            <a href="{{ url_for('main.face_detection') }}" class="navbar-item">
-                                Face Detection
                             </a>
                             <a href="{{ url_for('auth.logout') }}" class="navbar-item">
                                 Logout
