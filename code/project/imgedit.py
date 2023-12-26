@@ -45,12 +45,12 @@ def crop(file, file_url, x1, x2, y1, y2):
     cropped_image = img[x1:x2, y1:y2]
 
     filename, extension = os.path.splitext(file)
-    face_filename = filename + '_crop' + extension
-    face_file_url = os.path.dirname(path) + '/' + face_filename
+    crop_filename = filename + '_crop' + extension
+    face_file_url = os.path.dirname(path) + '/' + crop_filename
 
-    cv2.imwrite(face_file_url, cropped_image)
+    cv2.imwrite(crop_file_url, cropped_image)
 
-    return face_filename
+    return crop_filename
 
 def rotate(file, file_url, x, cX, cY):
     path = os.getcwd() + file_url
@@ -67,12 +67,12 @@ def rotate(file, file_url, x, cX, cY):
     rotated = cv2.warpAffine(img, M, (w, h))
 
     filename, extension = os.path.splitext(file)
-    face_filename = filename + '_rotate' + extension
-    face_file_url = os.path.dirname(path) + '/' + face_filename
+    rotate_filename = filename + '_rotate' + extension
+    rotate_file_url = os.path.dirname(path) + '/' + rotate_filename
 
-    cv2.imwrite(face_file_url, rotated)
+    cv2.imwrite(rotate_file_url, rotated)
 
-    return face_filename
+    return rotate_filename
 
 def resize(file, file_url, x):
     path = os.getcwd() + file_url
@@ -86,12 +86,12 @@ def resize(file, file_url, x):
     resized = cv2.resize(img, dim, interpolation = cv2.INTER_AREA)
 
     filename, extension = os.path.splitext(file)
-    face_filename = filename + '_resize' + extension
-    face_file_url = os.path.dirname(path) + '/' + face_filename
+    resize_filename = filename + '_resize' + extension
+    resize_file_url = os.path.dirname(path) + '/' + resize_filename
 
-    cv2.imwrite(face_file_url, resized)
+    cv2.imwrite(resize_file_url, resized)
 
-    return face_filename
+    return resize_filename
 
 def hsv(file, file_url, h, s, v):
     path = os.getcwd() + file_url
