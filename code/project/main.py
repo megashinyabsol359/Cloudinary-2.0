@@ -166,11 +166,13 @@ def hsv():
 
 
 @main.route('/trim_video', methods=['GET', 'POST'])
+@login_required
 def trim_video():
     uploaded_videos = [filename for filename in os.listdir(current_app.config["UPLOAD_FOLDER"])]
     return render_template('trim_video.html', uploaded_videos=uploaded_videos)
 
 @main.route('/upload_video', methods=['POST'])
+@login_required
 def upload_video():
     if not os.path.exists(current_app.config["UPLOAD_FOLDER"]):
         os.makedirs(current_app.config["UPLOAD_FOLDER"], exist_ok=True)
@@ -184,6 +186,7 @@ def upload_video():
         return {"error": "File not found"}
 
 @main.route('/edit_video/trim', methods=['POST'])
+@login_required
 def trim_video_edit():
     try:
         videofile = request.json['videofile']
