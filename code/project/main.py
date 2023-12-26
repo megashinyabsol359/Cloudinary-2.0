@@ -213,6 +213,7 @@ def trim_video_edit():
 
 
 @main.route('/playback/<filename>')
+@login_required
 def playback(filename):
     video_path = os.path.join(current_app.config["UPLOAD_FOLDER"], filename)
     return send_file(video_path)
