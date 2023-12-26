@@ -165,13 +165,7 @@ def hsv():
 
 
 
-def trim_video_function(videofile, start_time, end_time, trimmed_filename):
-    clip = VideoFileClip(os.path.join(current_app.config["UPLOAD_FOLDER"], videofile))
-    trimmed_filename_with_extension = f"{trimmed_filename}.mp4"
-    trimpath = os.path.join(current_app.config["UPLOAD_FOLDER"], trimmed_filename_with_extension)
-    trimmed_clip = clip.subclip(start_time, end_time)
-    trimmed_clip.write_videofile(trimpath)
-    return trimpath
+
 
 @main.route('/trim_video', methods=['GET', 'POST'])
 def trim_video():
@@ -204,7 +198,7 @@ def trim_video_edit():
         trim_end = int(request.json['trim_end'])
         trimmed_filename = request.json['trimmed_filename']
 
-        trimmed_videopath = trim_video_function(videofile, trim_start, trim_end, trimmed_filename)
+        trimmed_videopath = videoedit.trim_video_function(videofile, trim_start, trim_end, trimmed_filename)
         return {
             "status": "success",
             "message": "Video edited successfully",
