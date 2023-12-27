@@ -267,4 +267,28 @@ def login_cam_post():
     print('Đăng nhập khuôn mặt thành công.')
     return redirect(url_for('main.profile'))  # Chuyển hướng sau khi xác thực bằng khuôn mặt
 
+@auth.route('/change_password', methods=['GET', 'POST'])
+@login_required
+def change_password():
+    if request.method == 'POST':
+        current_password = request.form.get('current_password')
+        new_password = request.form.get('new_password')
+        confirm_password = request.form.get('confirm_password')
+
+        user = User.query.filter_by(id=current_user.get_id()).first()
+
+        if not check_password_hash(user.password, current_password):
+            flash('Mật khẩu hiện tại không đúng!', 'danger')
+        elif new_password != confirm_password:
+            flash('Mật khẩu mới và xác nhận mật khẩu không khớp!', 'danger')
+        elif len(new_password) < 8 or len(new_password) > 50:
+            flash('Mật khẩu mới phải có từ 8 đến 50 ký tự!', 'danger')
+        else:
+            user.password = generate_password_hash(new_password)
+            db.session.commit()
+            flash('Thay đổi mật khẩu thành công!', 'success')
+            return redirect(url_for('main.profile'))
+
+    return render_template('change_password.html')
+
 
