@@ -167,11 +167,13 @@ def hsv():
 
 
 @main.route('/trim_video', methods=['GET', 'POST'])
+@login_required
 def trim_video():
     uploaded_videos = [filename for filename in os.listdir(current_app.config["UPLOAD_FOLDER"])]
     return render_template('trim_video.html', uploaded_videos=uploaded_videos)
 
 @main.route('/upload_video', methods=['POST'])
+@login_required
 def upload_video():
     if not os.path.exists(current_app.config["UPLOAD_FOLDER"]):
         os.makedirs(current_app.config["UPLOAD_FOLDER"], exist_ok=True)
@@ -185,6 +187,7 @@ def upload_video():
         return {"error": "File not found"}
 
 @main.route('/edit_video/trim', methods=['POST'])
+@login_required
 def trim_video_edit():
     try:
         videofile = request.json['videofile']
@@ -195,7 +198,12 @@ def trim_video_edit():
 
         trim_start = int(request.json['trim_start'])
         trim_end = int(request.json['trim_end'])
-        trimmed_filename = request.json['trimmed_filename']
+        trimmed_filename = request.json.get('trimmed_filename', '')  # Lấy giá trị hoặc trả về rỗng nếu không có giá trị
+
+        # Nếu trimmed_filename là rỗng, sử dụng tên file gốc + "_trim"
+        if not trimmed_filename:
+            filename, file_extension = os.path.splitext(videofile)
+            trimmed_filename = f"{filename}_trim{file_extension}"
 
         # Get the duration of the video
         video_path = os.path.join(current_app.config["UPLOAD_FOLDER"], videofile)
@@ -223,6 +231,7 @@ def trim_video_edit():
 
 
 @main.route('/playback/<filename>')
+@login_required
 def playback(filename):
     video_path = os.path.join(current_app.config["UPLOAD_FOLDER"], filename)
     return send_file(video_path)
