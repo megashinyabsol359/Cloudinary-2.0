@@ -118,12 +118,12 @@ def hsv(file, file_url, h, s, v):
     hsv = cv2.cvtColor(img, cv2.COLOR_HSV2BGR)
 
     filename, extension = os.path.splitext(file)
-    face_filename = filename + '_resize' + extension
-    face_file_url = os.path.dirname(path) + '/' + face_filename
+    hsv_filename = filename + '_hsv' + extension
+    hsv_file_url = os.path.dirname(path) + '/' + hsv_filename
 
-    cv2.imwrite(face_file_url, hsv)
+    cv2.imwrite(hsv_file_url, hsv)
 
-    return face_filename
+    return hsv_filename
 
 
 
