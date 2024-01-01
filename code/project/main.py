@@ -9,6 +9,8 @@ from . import imgedit
 from . import videoedit
 from . import photos, videos
 from moviepy.editor import VideoFileClip
+from .videoedit import merge_video_function
+from werkzeug.utils import secure_filename
 
 import base64
 import os
@@ -29,6 +31,21 @@ class UploadForm(FlaskForm):
         validators=[
             #FileAllowed((photos, videos), 'Only images or videos are allowed.'),
             FileAllowed(photos, 'Only images or videos are allowed.'),
+            FileRequired('File field should not be empty.')
+        ]
+    )
+    submit = SubmitField('Upload')
+
+class MultiVideoUploadForm(FlaskForm):
+    video1 = FileField(
+        validators=[
+            FileAllowed(['mp4'], 'Only mp4 videos are allowed.'),
+            FileRequired('File field should not be empty.')
+        ]
+    )
+    video2 = FileField(
+        validators=[
+            FileAllowed(['mp4'], 'Only mp4 videos are allowed.'),
             FileRequired('File field should not be empty.')
         ]
     )
@@ -237,3 +254,22 @@ def object_detection():
         file_url = None
         gray_file_url = None
     return render_template('imgedit_object_detection.html', form = form, file_url = file_url, gray_file_url = gray_file_url)
+
+@main.route('/merge_video', methods=['GET', 'POST'])
+@login_required
+def merge_video():
+    form = MultiVideoUploadForm()
+    video_url = ''
+    if form.validate_on_submit():
+        video1 = form.video1.data
+        video2 = form.video2.data
+
+        video1_path = os.path.join(current_app.config["UPLOAD_FOLDER"], secure_filename(video1.filename))
+        video2_path = os.path.join(current_app.config["UPLOAD_FOLDER"], secure_filename(video2.filename))
+
+        video1.save(video1_path)
+        video2.save(video2_path)
+
+        video_url = merge_video_function(video1_path, video2_path)
+
+    return render_template('merge_video.html', form=form, video_url=video_url)
