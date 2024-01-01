@@ -1,7 +1,8 @@
 import os
 import cv2
-import torch
-import numpy as np
+#import torch
+from PIL import Image
+from ultralytics import YOLO
 
 def RGBtoGray(file, file_url):
     path = os.getcwd() + file_url
@@ -47,31 +48,41 @@ def crop(file, file_url, x1, x2, y1, y2):
 
     filename, extension = os.path.splitext(file)
     crop_filename = filename + '_crop' + extension
-    face_file_url = os.path.dirname(path) + '/' + crop_filename
+    crop_file_url = os.path.dirname(path) + '/' + crop_filename
 
     cv2.imwrite(crop_file_url, cropped_image)
 
     return crop_filename
 
-def rotate(file, file_url, x, cX, cY):
+def rotate(file, file_url, angle):
     path = os.getcwd() + file_url
     img = cv2.imread(path)
     
-    # grab the dimensions of the image and calculate the center of the
-    # image
-    (h, w) = img.shape[:2]
+    height, width = img.shape[:2] # image shape has 3 dimensions
+    image_center = (width/2, height/2) # getRotationMatrix2D needs coordinates in reverse order (width, height) compared to shape
     
-    (cX, cY) = (w // 2, h // 2)
+    rotation_mat = cv2.getRotationMatrix2D(image_center, angle, 1.)
     
-    # rotate our image by 45 degrees around the center of the image
-    M = cv2.getRotationMatrix2D((cX, cY), 45, 1.0)
-    rotated = cv2.warpAffine(img, M, (w, h))
+    # rotation calculates the cos and sin, taking absolutes of those.
+    abs_cos = abs(rotation_mat[0,0]) 
+    abs_sin = abs(rotation_mat[0,1])
+    
+    # find the new width and height bounds
+    bound_w = int(height * abs_sin + width * abs_cos)
+    bound_h = int(height * abs_cos + width * abs_sin)
+    
+    # subtract old image center (bringing image back to origo) and adding the new image center coordinates
+    rotation_mat[0, 2] += bound_w/2 - image_center[0]
+    rotation_mat[1, 2] += bound_h/2 - image_center[1]
+    
+    # rotate image with the new bounds and translated rotation matrix
+    rotated_img = cv2.warpAffine(img, rotation_mat, (bound_w, bound_h))
 
     filename, extension = os.path.splitext(file)
     rotate_filename = filename + '_rotate' + extension
     rotate_file_url = os.path.dirname(path) + '/' + rotate_filename
 
-    cv2.imwrite(rotate_file_url, rotated)
+    cv2.imwrite(rotate_file_url, rotated_img)
 
     return rotate_filename
 
@@ -96,42 +107,40 @@ def resize(file, file_url, x):
 
 def hsv(file, file_url, h, s, v):
     path = os.getcwd() + file_url
-    img = cv2.imread(path, cv2.IMREAD_COLOR)
+    img = cv2.imread(path, cv2.COLOR_BGR2HSV)
     
-    # Changes the H value
-    img[1:,:,0] = (img[1:,:,0] + h) % 180
-    
-    # Changes the S value
-    img[2:,:,1] += s
-    
-    # Changes the V value
-    img[:,:,2] += v
-    
+    img[1:,:,2] += h # Changes the H value
+    for i in img[0,:,:]:
+        if i >= 180:
+            i -= 180
+    img[2:,:,2] += s # Changes the S value
+    img[:,:,2] += v # Changes the V value
     hsv = cv2.cvtColor(img, cv2.COLOR_HSV2BGR)
 
     filename, extension = os.path.splitext(file)
-    hsv_filename = filename + '_resize' + extension
-    hsv_file_url = os.path.dirname(path) + '/' + hsv_filename
+    face_filename = filename + '_resize' + extension
+    face_file_url = os.path.dirname(path) + '/' + face_filename
 
-    cv2.imwrite(hsv_file_url, hsv)
+    cv2.imwrite(face_file_url, hsv)
 
-    return hsv_filename
+    return face_filename
+
+
 
 def object_detection(file, file_url):
     path = os.getcwd() + file_url
     img = cv2.imread(path)
     img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
     
-    model = torch.hub.load('ultralytics/yolov5', 'yolov5s', pretrained=True)  # force_reload = recache latest code
-    model.eval()
-    results = model([img])
-    results.render()  # updates results.imgs with boxes and labels
-
+    model = YOLO('yolov8n.pt')
+    
+    results = model.predict(img, show=True)
+    im_array = results[0].plot()  # plot a BGR numpy array of predictions
+    
     filename, extension = os.path.splitext(file)
-    gray_filename = filename + '_object_detection'
+    gray_filename = filename + '_object_detection' + extension
     gray_file_url = os.path.dirname(path) + '/' + gray_filename
 
-    results.save(save_dir=gray_file_url)
-    #cv2.imwrite(gray_file_url, results.imgs[0])
+    cv2.imwrite(gray_file_url, im_array)
 
-    return gray_filename + '/image0.jpg'
+    return gray_filename

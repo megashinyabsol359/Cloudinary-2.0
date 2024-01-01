@@ -7,13 +7,13 @@ from wtforms import SubmitField
 from . import db
 from . import imgedit
 from . import videoedit
+from . import photos, videos
 from moviepy.editor import VideoFileClip
 
 import base64
 import os
 
 main = Blueprint('main', __name__)
-
 
 @main.route('/')
 def index():
@@ -24,12 +24,11 @@ def index():
 def profile():
     return render_template('profile.html', name=current_user.name)
 
-photos = UploadSet('photos', IMAGES)
-
 class UploadForm(FlaskForm):
     photo = FileField(
         validators=[
-            FileAllowed(photos, 'Only images are allowed.'),
+            #FileAllowed((photos, videos), 'Only images or videos are allowed.'),
+            FileAllowed(photos, 'Only images or videos are allowed.'),
             FileRequired('File field should not be empty.')
         ]
     )
@@ -101,7 +100,7 @@ def crop():
         filename = photos.save(form.photo.data)
         file_url = url_for('main.get_file', filename=filename)
         crop_filename = imgedit.crop(filename, file_url, x1, x2, y1, y2)
-        crop_file_url = url_for('main.get_file', filename=face_filename)
+        crop_file_url = url_for('main.get_file', filename=crop_filename)
     else:
         file_url = None
         crop_file_url = None
@@ -113,13 +112,11 @@ def crop():
 def rotate():
     form = UploadForm()
     if form.validate_on_submit():
-        degree = int(request.form.get('degree'))
-        x = int(request.form.get('x'))
-        y = int(request.form.get('y'))
+        angle = int(request.form.get('degree'))
         filename = photos.save(form.photo.data)
         file_url = url_for('main.get_file', filename=filename)
-        rotate_filename = imgedit.rotate(filename, file_url, degree, x, y)
-        rotate_file_url = url_for('main.get_file', filename=face_filename)
+        rotate_filename = imgedit.rotate(filename, file_url, angle)
+        rotate_file_url = url_for('main.get_file', filename=rotate_filename)
     else:
         file_url = None
         rotate_file_url = None
@@ -134,7 +131,7 @@ def resize():
         filename = photos.save(form.photo.data)
         file_url = url_for('main.get_file', filename=filename)
         resize_filename = imgedit.resize(filename, file_url, size)
-        resize_file_url = url_for('main.get_file', filename=face_filename)
+        resize_file_url = url_for('main.get_file', filename=resize_filename)
     else:
         file_url = None
         resize_file_url = None
@@ -150,21 +147,12 @@ def hsv():
         l = int(request.form.get('light'))
         filename = photos.save(form.photo.data)
         file_url = url_for('main.get_file', filename=filename)
-        face_filename = imgedit.hsv(filename, file_url, h, s, l)
-        face_file_url = url_for('main.get_file', filename=face_filename)
+        object_filename = imgedit.hsv(filename, file_url, h, s, l)
+        object_file_url = url_for('main.get_file', filename=object_filename)
     else:
         file_url = None
-        face_file_url = None
-    return render_template('imgedit_resize.html', form = form, file_url = file_url, face_file_url = face_file_url)
-
-
-
-
-
-
-
-
-
+        object_file_url = None
+    return render_template('imgedit_resize.html', form = form, file_url = file_url, face_file_url = object_file_url)
 
 @main.route('/trim_video', methods=['GET', 'POST'])
 @login_required
@@ -245,9 +233,7 @@ def object_detection():
         file_url = url_for('main.get_file', filename=filename)
         gray_filename = imgedit.object_detection(filename, file_url)
         gray_file_url = url_for('main.get_file', filename=gray_filename)
-        print(file_url)
-        print(gray_file_url)        
     else:
         file_url = None
         gray_file_url = None
-    return render_template('imgedit_RGBtoGray.html', form = form, file_url = "/uploads/aimi_4.png", gray_file_url = "/uploads/test/aimi.png")
+    return render_template('imgedit_object_detection.html', form = form, file_url = file_url, gray_file_url = gray_file_url)

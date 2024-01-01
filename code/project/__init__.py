@@ -1,13 +1,18 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
-from flask_uploads import UploadSet, IMAGES, configure_uploads, ARCHIVES
+from flask_uploads import UploadSet, IMAGES, configure_uploads
+
+import os
 
 # init SQLAlchemy so we can use it later in our models
 db = SQLAlchemy()
 
+photos = UploadSet('photos', IMAGES)
+videos = UploadSet('photos', extensions='mp4')
+
 def create_app():
-    app = Flask(__name__)
+    app = Flask(__name__, instance_path=os.getcwd()+'/database')
 
     app.config['SECRET_KEY'] = 'secret-key-goes-here'
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///db.sqlite'
@@ -17,11 +22,8 @@ def create_app():
     UPLOAD_FOLDER = "./uploads"
     app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 
-    photos = UploadSet('photos', IMAGES)
-    configure_uploads(app, photos)
-
     # Configure the upload folder for videos
-
+    configure_uploads(app, (photos, videos))
     
 
     db.init_app(app)
