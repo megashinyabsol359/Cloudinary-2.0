@@ -59,9 +59,20 @@
                                     <!-- Thêm các chức năng khác -->
                                 </div>
                             </div>
-                            <a href="{{ url_for('main.trim_video') }}" class="navbar-item">
-                                Trim
-                            </a>
+                            <div class="navbar-item has-dropdown is-hoverable">
+                                <a class="navbar-link">
+                                    Edit Video
+                                </a>
+                                <div class="navbar-dropdown">
+                                    <a href="{{ url_for('main.trim_video') }}" class="navbar-item">
+                                        Trim
+                                    </a>
+                                    <a href="{{ url_for('main.merge_video') }}" class="navbar-item">
+                                        Merge
+                                    </a>
+                                    <!-- Thêm các chức năng khác -->
+                                </div>
+                            </div>
                             <a href="{{ url_for('auth.change_password') }}" class="navbar-item">
                                 Change Password
                             </a>
