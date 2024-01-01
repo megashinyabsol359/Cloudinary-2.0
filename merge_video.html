@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="column is-4 is-offset-4">
+    <h3 class="title">Gộp video</h3>
+    <div class="box">
+        <h1>Video Merger</h1>
+    <form method="post" enctype="multipart/form-data">
+        {{ form.csrf_token }}
+        {{ form.hidden_tag() }}
+        <label for="video1">Upload Video 1:</label>
+        {{ form.video1() }}
+        <br>
+        <label for="video2">Upload Video 2:</label>
+        {{ form.video2() }}
+        <br>
+        {{ form.submit() }}
+    </form>
+    {% if video_url %}
+        <h2>Merged Video:</h2>
+        <video width="640" height="480" controls>
+            <source src="{{ video_url }}" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>
+        
+        <br>
+        <!-- Thêm nút để tải xuống -->
+        <a href="{{ video_url }}" download="merged_video.mp4" class="button is-block is-success is-large is-fullwidth">
+            Tải video đã gộp
+        </a>
+    {% endif %}
+    </div>
+</div>
+{% endblock %}
