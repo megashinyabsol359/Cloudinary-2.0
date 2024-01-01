@@ -147,12 +147,12 @@ def hsv():
         l = int(request.form.get('light'))
         filename = photos.save(form.photo.data)
         file_url = url_for('main.get_file', filename=filename)
-        object_filename = imgedit.hsv(filename, file_url, h, s, l)
-        object_file_url = url_for('main.get_file', filename=object_filename)
+        hsv_filename = imgedit.hsv(filename, file_url, h, s, l)
+        hsv_file_url = url_for('main.get_file', filename=hsv_filename)
     else:
         file_url = None
-        object_file_url = None
-    return render_template('imgedit_resize.html', form = form, file_url = file_url, face_file_url = object_file_url)
+        hsv_file_url = None
+    return render_template('imgedit_hsv.html', form = form, file_url = file_url, hsv_file_url = hsv_file_url)
 
 @main.route('/trim_video', methods=['GET', 'POST'])
 @login_required
