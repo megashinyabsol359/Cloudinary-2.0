@@ -16,14 +16,8 @@
         
             <div class="row">
                 <div>
-                    <button class="button is-block is-info is-large is-fullwidth">
-                        {{ form.photo(class="form-control") }}
-                    </button>                  
-                </div>     
-                <div>
-                    <button class="button is-block is-info is-large is-fullwidth">
-                        {{ form.submit(class="btn btn-success") }}
-                    </button>                 
+                    {{ form.photo(class="button is-block is-info is-large is-fullwidth") }}
+                    {{ form.submit(class="button is-block is-info is-large is-fullwidth") }}
                 </div>
             </div>
         </form>
@@ -32,6 +26,11 @@
 {% if file_url %}
     <img src="{{ file_url }}" style="width: 400px;">
     <img src="{{ gray_file_url }}" style="width: 400px;">
+    
+    <!-- Add a button to download the cropped image -->
+    <a href="{{ crop_file_url }}" download="cropped_image.jpg" class="button is-block is-success is-large is-fullwidth">
+        Tải ảnh đã cắt
+    </a>
 {% endif %}
 
 {% endblock %}
