@@ -1,6 +1,7 @@
 import os
 import cv2
 import torch
+import numpy as np
 
 def RGBtoGray(file, file_url):
     path = os.getcwd() + file_url
@@ -95,25 +96,26 @@ def resize(file, file_url, x):
 
 def hsv(file, file_url, h, s, v):
     path = os.getcwd() + file_url
-    img = cv2.imread(path, cv2.COLOR_BGR2HSV)
+    img = cv2.imread(path, cv2.IMREAD_COLOR)
     
-    img[1:,:,2] += h # Changes the H value
-    for i in img[0,:,:]:
-        if i >= 180:
-            i -= 180
-    img[2:,:,2] += s # Changes the S value
-    img[:,:,2] += v # Changes the V value
+    # Changes the H value
+    img[1:,:,0] = (img[1:,:,0] + h) % 180
+    
+    # Changes the S value
+    img[2:,:,1] += s
+    
+    # Changes the V value
+    img[:,:,2] += v
+    
     hsv = cv2.cvtColor(img, cv2.COLOR_HSV2BGR)
 
     filename, extension = os.path.splitext(file)
-    face_filename = filename + '_resize' + extension
-    face_file_url = os.path.dirname(path) + '/' + face_filename
+    hsv_filename = filename + '_resize' + extension
+    hsv_file_url = os.path.dirname(path) + '/' + hsv_filename
 
-    cv2.imwrite(face_file_url, hsv)
+    cv2.imwrite(hsv_file_url, hsv)
 
-    return face_filename
-
-
+    return hsv_filename
 
 def object_detection(file, file_url):
     path = os.getcwd() + file_url
