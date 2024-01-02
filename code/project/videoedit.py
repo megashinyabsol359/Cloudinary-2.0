@@ -2,13 +2,16 @@ from moviepy.editor import VideoFileClip, concatenate_videoclips
 import os
 from flask import current_app
 
-def trim_video_function(videofile, start_time, end_time, trimmed_filename):
-    clip = VideoFileClip(os.path.join(current_app.config["UPLOAD_FOLDER"], videofile))
-    trimmed_filename_with_extension = f"{trimmed_filename}.mp4"
-    trimpath = os.path.join(current_app.config["UPLOAD_FOLDER"], trimmed_filename_with_extension)
-    trimmed_clip = clip.subclip(start_time, end_time)
-    trimmed_clip.write_videofile(trimpath)
-    return trimpath
+def trim_video_function(videofile, start_time, end_time):
+    clip = VideoFileClip(videofile)
+
+    # Generate a unique filename for the trimed video
+    trimmed_filename_with_extension = f"trimed_video.mp4"
+    trimed_filepath = os.path.join(current_app.config["UPLOAD_FOLDER"], trimmed_filename_with_extension)
+
+    final_clip = clip.subclip(start_time, end_time)
+    final_clip.write_videofile(trimed_filepath, codec="libx264", audio_codec="aac", temp_audiofile="temp-audio.m4a", remove_temp=True, fps=24, threads=4)
+    return trimed_filepath
 
 def merge_video_function(video1_path, video2_path):
     clip1 = VideoFileClip(video1_path)
