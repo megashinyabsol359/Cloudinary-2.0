@@ -9,7 +9,6 @@ from . import imgedit
 from . import videoedit
 from . import photos, videos
 from moviepy.editor import VideoFileClip
-from .videoedit import merge_video_function
 from werkzeug.utils import secure_filename
 
 import base64
@@ -270,6 +269,6 @@ def merge_video():
         video1.save(video1_path)
         video2.save(video2_path)
 
-        video_url = merge_video_function(video1_path, video2_path)
+        video_url = videoedit.merge_video_function(video1_path, video2_path)
 
     return render_template('merge_video.html', form=form, video_url=video_url)
