@@ -5,8 +5,10 @@ from flask_login import login_user, login_required, logout_user, current_user
 import face_recognition
 import cv2
 
-from .models import User
+from .models import User, Track
 from . import db
+
+import time
 
 import base64
 import numpy as np
@@ -15,17 +17,28 @@ auth = Blueprint('auth', __name__)
 
 @auth.route('/login')
 def login():
+    if current_user.is_authenticated:
+        return redirect(url_for('main.index')) 
+    
     return render_template('login.html')
 
 @auth.route('/login', methods=['POST'])
 def login_post():
+    if current_user.is_authenticated:
+        return redirect(url_for('main.index')) 
+    
     # code login
     email = request.form.get('email')
     password = request.form.get('password')
     remember = True if request.form.get('remember') else False
 
     user = User.query.filter_by(email=email).first()
-
+    
+    is_user_login = Track.query.filter_by(email=email,is_login=True).first()
+    if is_user_login:
+        flash('Tài khoản đang đăng nhập ở nơi khác')
+        return redirect(url_for('auth.login')) # if the user already login somewhere else
+    
     # kiểm tra user tồn tại trong database
     # kiểm tra password với hash
     if not user or not check_password_hash(user.password, password):
@@ -34,15 +47,25 @@ def login_post():
 
     # nếu đúng hết ở trên thì đăng nhập người dùng
     login_user(user, remember=remember)
+    new_login = Track(email=email, time_login=time.ctime())
+    db.session.add(new_login)
+    db.session.commit()
+    
     return redirect(url_for('main.profile'))
 
 
 @auth.route('/signup')
 def signup():
+    if current_user.is_authenticated:
+        return redirect(url_for('main.index')) 
+    
     return render_template('signup.html')
 
 @auth.route('/signup', methods=['POST'])
 def signup_post():
+    if current_user.is_authenticated:
+        return redirect(url_for('main.index')) 
+    
     # code lấy thông tin từ người dùng
     email = request.form.get('email')
     name = request.form.get('name')
@@ -73,6 +96,11 @@ def signup_post():
 @auth.route('/logout')
 @login_required
 def logout():
+    user = User.query.filter_by(id=current_user.get_id()).first() # kiểm tra người dùng trong database qua email
+    login_log = Track.query.filter_by(email=user.email, is_login=True).first() 
+    login_log.is_login = False
+    login_log.time_logout = time.ctime()
+    db.session.commit()
     logout_user()
     return redirect(url_for('main.index'))
 
@@ -120,13 +148,24 @@ def register_face_post():
 
 @auth.route('/login_face')
 def login_face():
+    if current_user.is_authenticated:
+        return redirect(url_for('main.index')) 
+    
     return render_template('login_face.html')
 
 @auth.route('/login_face', methods=['POST'])
 def login_face_post():
+    if current_user.is_authenticated:
+        return redirect(url_for('main.index')) 
+    
     email = request.form.get('email')
     user = User.query.filter_by(email=email).first() # kiểm tra tài khoản trong database qua email
     remember = True if request.form.get('remember') else False
+    
+    is_user_login = Track.query.filter_by(email=email,is_login=True).first()
+    if is_user_login:
+        flash('Tài khoản đang đăng nhập ở nơi khác')
+        return redirect(url_for('auth.login_face')) # if the user already login somewhere else
 
     uploaded_image = request.files['image']
         
@@ -157,7 +196,6 @@ def login_face_post():
 @login_required
 def register_cam():
     error = request.args.get('error')
-    print(error)
     return render_template('register_cam.html',error=error)
 
 @auth.route('/register_cam', methods=['POST'])
@@ -198,23 +236,26 @@ def register_cam_post():
 
         db.session.commit()
         error = 'Đăng ký khuôn mặt thành công!'
-        print('Đăng ký khuôn mặt thành công!')
         return redirect(url_for('auth.register_cam', error=error))
     else:
         error = 'Vui lòng trong facecam chỉ chứa duy nhất một khuôn mặt.'
-        print('Vui lòng trong facecam chỉ chứa duy nhất một khuôn mặt!')
 
     return redirect(url_for('auth.register_cam', error=error))
 
 
 @auth.route('/login_cam')
 def login_cam():
+    if current_user.is_authenticated:
+        return redirect(url_for('main.index')) 
+    
     error = request.args.get('error')
-    print(error)
     return render_template('login_cam.html',error=error)
 
 @auth.route('/login_cam', methods=['POST'])
 def login_cam_post():
+    if current_user.is_authenticated:
+        return redirect(url_for('main.index')) 
+    
     
     # Nhận dữ liệu hình ảnh từ yêu cầu POST
     image_url = request.json['image']
@@ -223,6 +264,11 @@ def login_cam_post():
     
     remember = True if request.json['remember'] else False  
     
+    is_user_login = Track.query.filter_by(email=email,is_login=True).first()
+    if is_user_login:
+        flash('Tài khoản đang đăng nhập ở nơi khác')
+        error = 'Tài khoản đang đăng nhập ở nơi khác'
+        return redirect(url_for('auth.login_cam', error=error)) # if the user already login somewhere else
     
     # Loại bỏ phần đầu của chuỗi dữ liệu URL (prefix "data:image/jpeg;base64,")
     img_data = image_url.split(',')[1]
@@ -238,33 +284,24 @@ def login_cam_post():
         
     if not user: # nếu tìm ra người dùng thì quay về trang signup dùng gmail khác
         flash('Xác thực bằng khuôn mặt không thành công. Vui lòng kiểm tra lại thông tin đăng nhập.')
-        print('Xác thực bằng khuôn mặt không thành công. Vui lòng kiểm tra lại thông tin đăng nhập.')
         error = 'Xác thực bằng khuôn mặt không thành công. Vui lòng kiểm tra lại thông tin đăng nhập.'
         return redirect(url_for('auth.login_cam', error=error))
-
-    # if not uploaded_image:# kiểm tra có hình chưa
-    #     flash('Vui lòng tải lên một ảnh.', 'danger')
-    #     print('Vui lòng tải lên một ảnh.')
-    #     return redirect(url_for('auth.login_cam'))
 
     face_locations = face_recognition.face_locations(image)
 
     if len(face_locations) != 1:
         flash('Vui lòng tải lên một ảnh chứa duy nhất một khuôn mặt.', 'danger')
-        print('Vui lòng tải lên một ảnh chứa duy nhất một khuôn mặt.')
         error = 'Vui lòng tải lên một ảnh chứa duy nhất một khuôn mặt.'
         return redirect(url_for('auth.login_cam', error=error))
     face_encoding = face_recognition.face_encodings(image)[0]
     
     if user.face_encoding is None or not face_recognition.compare_faces([user.face_encoding], face_encoding)[0]:
         flash('Xác thực bằng khuôn mặt không thành công. Vui lòng kiểm tra lại thông tin đăng nhập.', 'danger')
-        print('Xác thực bằng khuôn mặt không thành công. Vui lòng kiểm tra lại thông tin đăng nhập.')
         error = 'Xác thực bằng khuôn mặt không thành công. Vui lòng kiểm tra lại thông tin đăng nhập.'
         return redirect(url_for('auth.login_cam', error=error))
         
     
     login_user(user, remember=remember) # Sau khi qua hết thì đăng nhập user
-    print('Đăng nhập khuôn mặt thành công.')
     return redirect(url_for('main.profile'))  # Chuyển hướng sau khi xác thực bằng khuôn mặt
 
 @auth.route('/change_password', methods=['GET', 'POST'])

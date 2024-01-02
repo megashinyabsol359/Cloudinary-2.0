@@ -11,7 +11,7 @@ class User(UserMixin, db.Model):
     
 class Track(db.Model):
     id = db.Column(db.Integer, primary_key=True) # primary keys are required by SQLAlchemy
-    email = db.Column(db.String(100), unique=True)
+    email = db.Column(db.String(100))
     time_login = db.Column(db.String(100))
     is_login = db.Column(db.Boolean, nullable=False, default=True)
     time_logout = db.Column(db.String(100))

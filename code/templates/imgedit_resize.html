@@ -18,7 +18,7 @@
                 {{ form.photo(class="button is-block is-info is-large is-fullwidth") }}
                 <div class="field">
                     <div class="control">
-                        <input type="number" onkeydown="if(event.key==='.'){event.preventDefault();}"  oninput="event.target.value = event.target.value.replace(/[^0-9]*/g,'');" class="input is-large" name="size" placeholder="Size bao nhieu %?">
+                        <input type="number" onkeydown="if(event.key==='.'){event.preventDefault();}"  oninput="event.target.value = event.target.value.replace(/[^0-9]*/g,'');" class="input is-large" name="size" placeholder="Size bao nhieu %?" required>
                     </div>
                 </div>
                 {{ form.submit(class="button is-block is-info is-large is-fullwidth") }}

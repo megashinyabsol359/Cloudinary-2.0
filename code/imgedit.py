@@ -131,10 +131,10 @@ def hsv(file, file_url, h, s, v):
     img = cv2.imread(path, cv2.IMREAD_COLOR)
     hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
 
-    img[:,:,0] = (img[:,:,0] + h) % 180
-    img[:,:,1] = np.where((255 - img[:,:,1]) < s,255,img[:,:,1]+s) # Changes the S value
-    img[:,:,2] += 10
-    hsv = cv2.cvtColor(img, cv2.COLOR_HSV2BGR)
+    hsv[:,:,0] = (hsv[:,:,0] + h) % 180
+    hsv[:,:,1] = np.where((255 - hsv[:,:,1]) < s,255,hsv[:,:,1]+s) # Changes the S value
+    hsv[:,:,2] = np.where((255 - hsv[:,:,2]) < v,255,hsv[:,:,2]+v) # Changes the V value
+    hsv = cv2.cvtColor(hsv, cv2.COLOR_HSV2BGR)
     
     filename, extension = os.path.splitext(file)
     hsv_filename = filename + '_hsv' + extension
