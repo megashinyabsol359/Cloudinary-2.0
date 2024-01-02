@@ -35,6 +35,15 @@ class UploadForm(FlaskForm):
     )
     submit = SubmitField('Upload')
 
+class VideoUploadForm(FlaskForm):
+    video = FileField(
+        validators=[
+            FileAllowed(['mp4'], 'Only mp4 videos are allowed.'),
+            FileRequired('File field should not be empty.')
+        ]
+    )
+    submit = SubmitField('Upload')
+
 class MultiVideoUploadForm(FlaskForm):
     video1 = FileField(
         validators=[
