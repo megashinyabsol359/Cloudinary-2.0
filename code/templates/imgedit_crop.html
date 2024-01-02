@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="column is-4 is-offset-4">
+    <h3 class="title">Cắt ảnh</h3>
+    <div class="box">
+        {{ form.hidden_tag() }}
+
+        {% for error in form.photo.errors %}
+            <div class="notification is-danger"> {{ error }} </div>
+        {% endfor %}
+
+        <form method="POST" enctype="multipart/form-data">
+            {{ form.hidden_tag() }}
+        
+            <div class="row">
+                {{ form.photo(class="button is-block is-info is-large is-fullwidth") }}
+                <div class="field">
+                    <div class="control">
+                        <input type="number" onkeydown="if(event.key==='.'){event.preventDefault();}"  oninput="event.target.value = event.target.value.replace(/[^0-9]*/g,'');" class="input is-large" name="x1" placeholder="x1">
+                    </div>
+                </div>
+                <div class="field">
+                    <div class="control">
+                        <input type="number" onkeydown="if(event.key==='.'){event.preventDefault();}"  oninput="event.target.value = event.target.value.replace(/[^0-9]*/g,'');" class="input is-large" name="x2" placeholder="x2">
+                    </div>
+                </div>
+                <div class="field">
+                    <div class="control">
+                        <input type="number" onkeydown="if(event.key==='.'){event.preventDefault();}"  oninput="event.target.value = event.target.value.replace(/[^0-9]*/g,'');" class="input is-large" name="y1" placeholder="y1">
+                    </div>
+                </div>
+                <div class="field">
+                    <div class="control">
+                        <input type="number" onkeydown="if(event.key==='.'){event.preventDefault();}"  oninput="event.target.value = event.target.value.replace(/[^0-9]*/g,'');" class="input is-large" name="y2" placeholder="y2">
+                    </div>
+                </div>
+                {{ form.submit(class="button is-block is-info is-large is-fullwidth") }}
+            </div>
+        </form>
+    </div>
+</div>
+
+{% if file_url %}
+    <img src="{{ file_url }}" style="width: 400px;">
+    <img src="{{ crop_file_url }}" style="width: 400px;">
+    
+    <!-- Add a button to download the cropped image -->
+    <a href="{{ crop_file_url }}" download="cropped_image.jpg" class="button is-block is-success is-large is-fullwidth">
+        Tải ảnh đã cắt
+    </a>
+{% endif %}
+
+{% endblock %}

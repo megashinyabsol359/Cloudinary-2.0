@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="column is-4 is-offset-4">
+    <h3 class="title">Phát hiện mặt người</h3>
+    <div class="box">
+        {{ form.hidden_tag() }}
+
+        {% for error in form.photo.errors %}
+            <div class="notification is-danger"> {{ error }} </div>
+        {% endfor %}
+
+        <form method="POST" enctype="multipart/form-data">
+            {{ form.hidden_tag() }}
+        
+            <div class="row">
+                <div>
+                    {{ form.photo(class="button is-block is-info is-large is-fullwidth") }}
+                    {{ form.submit(class="button is-block is-info is-large is-fullwidth") }}
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{% if file_url %}
+    <img src="{{ file_url }}" style="width: 400px;">
+    <img src="{{ face_file_url }}" style="width: 400px;">
+
+    <!-- Add a button to download the resized image -->
+    <a href="{{ face_file_url }}" download="face_detection_image.jpg" class="button is-block is-success is-large is-fullwidth">
+        Tải ảnh nhận dạng mặt người
+    </a>
+{% endif %}
+
+{% endblock %}

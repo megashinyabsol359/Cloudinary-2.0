@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1 class="title">
+    Xin chào, {{ name }}!
+</h1>
+<div>
+    <a href="{{ url_for('auth.register_face') }}" class="button is-block is-info is-large is-fullwidth">
+        Tạo Face ID bằng ảnh đính kèm
+    </a>
+</div>
+<div>
+    <a href="{{ url_for('auth.register_cam') }}" class="button is-block is-info is-large is-fullwidth">
+        Tạo Face ID bằng bật facecam
+    </a>
+</div>
+
+{% endblock %}
