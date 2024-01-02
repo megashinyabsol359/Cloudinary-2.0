@@ -1,146 +1,50 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="column is-4 is-offset-4">
-    <!-- Upload Video Section -->
-    <h1>Video Editor - Upload</h1>
+<div class="column is-6 is-offset-3">
+    <h3 class="title">Cắt video</h3>
+    <div class="box">
+        <h1>Video Trimmer</h1>
+        
+        <!-- Hiển thị thông báo lỗi -->
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <div class="notification is-danger">
+                {{ messages[0] }}
+            </div>
+        {% endif %}
+        {% endwith %}
 
-    <form action="/upload_video" method="post" enctype="multipart/form-data" id="upload-form">
-        <input type="file" name="videofile" accept="video/*" required>
-        <button type="submit">Upload Video</button>
-    </form>
-
-    <!-- Display a message when the video is uploaded -->
-    <div id="upload-message" style="color: green;"></div>
-
-    <!-- Display the uploaded video -->
-    <div id="uploaded-video-container" style="display: none;">
-        <h2>Uploaded Video:</h2>
-        <video id="uploaded-video" controls style="width: 320px; height: 240px;">
-            Your browser does not support the video tag.
-        </video>
+        <form method="post" enctype="multipart/form-data">
+            {{ form.csrf_token }}
+            {{ form.hidden_tag() }}
+            
+            <label for="video">Upload Video:</label>
+            {{ form.video() }}
+            <div>
+                <label for="trim_start">Trim Start Time (in seconds):</label>
+                <input type="number" name="trim_start" required>
+            </div>
+            <div>
+                <label for="trim_end">Trim End Time (in seconds):</label>
+                <input type="number" name="trim_end" required>
+            </div>
+            {{ form.submit() }}
+        </form>
+        
+        {% if video_url %}
+            <h2>Trimmed Video:</h2>
+            <video width="640" height="480" controls>
+                <source src="{{ video_url }}" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+            
+            <br>
+            <!-- Thêm nút để tải xuống -->
+            <a href="{{ video_url }}" download="trimmed_video.mp4" class="button is-block is-success is-large is-fullwidth">
+                Tải video đã cắt
+            </a>
+        {% endif %}
     </div>
-
-    <!-- Trim Video Section -->
-    <h1>Video Editor - Trim</h1>
-
-    <form id="trim-form">
-        <label for="trim-start">Start Time (seconds):</label>
-        <input type="number" id="trim-start" name="trim-start" required><br>
-
-        <label for="trim-end">End Time (seconds):</label>
-        <input type="number" id="trim-end" name="trim-end" required><br>
-
-        <label for="trimmed-filename">Trimmed File Name:</label>
-        <input type="text" id="trimmed-filename" name="trimmed-filename" required><br>
-
-        <button type="button" onclick="trimVideo()">Trim Video</button>
-    </form>
-
-    <!-- Trimmed Video Display Section -->
-    <div id="trimmed-video-container" style="display: none;">
-        <h2>Trimmed Video:</h2>
-        <video id="trimmed-video" controls style="width: 320px; height: 240px;">
-            Your browser does not support the video tag.
-        </video>
-        <!-- Download button for the trimmed video -->
-        <button id="download-button" onclick="downloadTrimmedVideo()" disabled>Download Trimmed Video</button>
-    </div>
-
-    <!-- Play button for the trimmed video -->
-    <button id="play-button" onclick="playTrimmedVideo()" disabled>Play Trimmed Video</button>
-    <script>
-        function trimVideo() {
-            const trimForm = document.getElementById('trim-form');
-            const formData = new FormData(trimForm);
-
-            // Get the uploaded video file name
-            const uploadedVideo = document.getElementById('uploaded-video');
-            const uploadedFileName = uploadedVideo.src.split('/').pop();
-
-            fetch('/edit_video/trim', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    videofile: uploadedFileName,
-                    trim_start: formData.get('trim-start'),
-                    trim_end: formData.get('trim-end'),
-                    trimmed_filename: formData.get('trimmed-filename')
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                alert(data.message);
-                if (data.status === 'success') {
-                    // Display the trimmed video
-                    const trimmedVideoContainer = document.getElementById('trimmed-video-container');
-                    const trimmedVideo = document.getElementById('trimmed-video');
-                    trimmedVideo.src = data.trimmed_videopath;
-                    trimmedVideoContainer.style.display = 'block';
-                    document.getElementById('play-button').disabled = false;
-                    document.getElementById('download-button').disabled = false;
-                }
-            });
-        }
-
-        function playTrimmedVideo() {
-            const trimmedVideo = document.getElementById('trimmed-video');
-            trimmedVideo.play();
-        }
-
-        function downloadTrimmedVideo() {
-            const trimmedVideo = document.getElementById('trimmed-video');
-            const downloadButton = document.getElementById('download-button');
-
-            // Create a temporary anchor element
-            const downloadLink = document.createElement('a');
-            downloadLink.href = trimmedVideo.src;
-            downloadLink.download = 'trimmed_video.mp4'; // You can set the default filename here
-
-            // Trigger a click on the anchor element
-            document.body.appendChild(downloadLink);
-            downloadLink.click();
-            document.body.removeChild(downloadLink);
-
-            // Disable the download button after clicking
-            downloadButton.disabled = true;
-        }
-
-        // Update the upload form to handle the response
-        const uploadForm = document.getElementById('upload-form');
-        const uploadMessage = document.getElementById('upload-message');
-
-        uploadForm.addEventListener('submit', function (event) {
-            event.preventDefault();
-            const formData = new FormData(uploadForm);
-
-            fetch('/upload_video', {
-                method: 'POST',
-                body: formData
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.filename) {
-                    uploadMessage.style.color = 'green';
-                    uploadMessage.textContent = `Video "${data.filename}" successfully uploaded!`;
-
-                    // Display the uploaded video
-                    const uploadedVideoContainer = document.getElementById('uploaded-video-container');
-                    const uploadedVideo = document.getElementById('uploaded-video');
-                    uploadedVideo.src = `/playback/${data.filename}`;
-                    uploadedVideoContainer.style.display = 'block';
-                } else if (data.error) {
-                    uploadMessage.style.color = 'red';
-                    uploadMessage.textContent = `Error: ${data.error}`;
-                }
-            })
-            .catch(error => {
-                uploadMessage.style.color = 'red';
-                uploadMessage.textContent = `Error: ${error.message}`;
-            });
-        });
-    </script>
 </div>
 {% endblock %}
