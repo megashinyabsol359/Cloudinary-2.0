@@ -190,6 +190,9 @@ def login_face_post():
         return redirect(url_for('auth.login_face'))
         
     login_user(user, remember=remember) # Sau khi qua hết thì đăng nhập user
+    new_login = Track(email=email, time_login=time.ctime())
+    db.session.add(new_login)
+    db.session.commit()
     return redirect(url_for('main.profile'))  # Chuyển hướng sau khi xác thực bằng khuôn mặt
 
 @auth.route('/register_cam')
@@ -302,6 +305,9 @@ def login_cam_post():
         
     
     login_user(user, remember=remember) # Sau khi qua hết thì đăng nhập user
+    new_login = Track(email=email, time_login=time.ctime())
+    db.session.add(new_login)
+    db.session.commit()
     return redirect(url_for('main.profile'))  # Chuyển hướng sau khi xác thực bằng khuôn mặt
 
 @auth.route('/change_password', methods=['GET', 'POST'])
