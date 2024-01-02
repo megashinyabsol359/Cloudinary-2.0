@@ -233,7 +233,6 @@ def trim_video_edit():
             "message": "Video edit failure: " + str(e),
         }
 
-
 @main.route('/playback/<filename>')
 @login_required
 def playback(filename):
