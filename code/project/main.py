@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, send_from_directory, url_for, current_app, request, Response, send_file, jsonify
+from flask import Blueprint, render_template, send_from_directory, url_for, current_app, request, Response, send_file, jsonify, flash
 from flask_login import login_required, current_user
 from flask_uploads import UploadSet, IMAGES
 from flask_wtf import FlaskForm
@@ -170,12 +170,6 @@ def hsv():
         hsv_file_url = None
     return render_template('imgedit_hsv.html', form = form, file_url = file_url, hsv_file_url = hsv_file_url)
 
-@main.route('/trim_video', methods=['GET', 'POST'])
-@login_required
-def trim_video():
-    uploaded_videos = [filename for filename in os.listdir(current_app.config["UPLOAD_FOLDER"])]
-    return render_template('trim_video.html', uploaded_videos=uploaded_videos)
-
 @main.route('/upload_video', methods=['POST'])
 @login_required
 def upload_video():
@@ -190,54 +184,36 @@ def upload_video():
     except FileNotFoundError:
         return {"error": "File not found"}
 
-@main.route('/edit_video/trim', methods=['POST'])
+@main.route('/trim_video', methods=['GET', 'POST'])
 @login_required
-def trim_video_edit():
-    try:
-        videofile = request.json['videofile']
-        
-        # Kiểm tra xem videofile có giá trị không
-        if videofile is None:
-            raise ValueError("Videofile is not provided")
+def trim_video():
+    form = VideoUploadForm()
+    video_url = ''
+    
+    if form.validate_on_submit():
+        video = form.video.data
+        trim_start = int(request.form.get('trim_start'))
+        trim_end = int(request.form.get('trim_end'))
 
-        trim_start = int(request.json['trim_start'])
-        trim_end = int(request.json['trim_end'])
-        trimmed_filename = request.json.get('trimmed_filename', '')  # Lấy giá trị hoặc trả về rỗng nếu không có giá trị
+        # Thêm điều kiện kiểm tra
+        if trim_start < 0 or trim_end <= trim_start:
+            flash('Invalid trim start or trim end values.', 'error')
+            return render_template('trim_video.html', form=form, video_url=video_url)
 
-        # Nếu trimmed_filename là rỗng, sử dụng tên file gốc + "_trim"
-        if not trimmed_filename:
-            filename, file_extension = os.path.splitext(videofile)
-            trimmed_filename = f"{filename}_trim{file_extension}"
+        video_path = os.path.join(current_app.config["UPLOAD_FOLDER"], secure_filename(video.filename))
+        video.save(video_path)
 
-        # Get the duration of the video
-        video_path = os.path.join(current_app.config["UPLOAD_FOLDER"], videofile)
+        # Kiểm tra thời gian video
         clip = VideoFileClip(video_path)
         video_duration = clip.duration
-
-        # Check if the end time is greater than the video duration
+        
         if trim_end > video_duration:
-            return {
-                "status": "error",
-                "message": "End time is greater than the duration of the video",
-            }
+            flash('Trim end time exceeds video duration.', 'error')
+            return render_template('trim_video.html', form=form, video_url=video_url)
 
-        trimmed_videopath = videoedit.trim_video_function(videofile, trim_start, trim_end, trimmed_filename)
-        return {
-            "status": "success",
-            "message": "Video edited successfully",
-            "trimmed_videopath": trimmed_videopath
-        }
-    except Exception as e:
-        return {
-            "status": "error",
-            "message": "Video edit failure: " + str(e),
-        }
+        video_url = videoedit.trim_video_function(video_path, trim_start, trim_end)
 
-@main.route('/playback/<filename>')
-@login_required
-def playback(filename):
-    video_path = os.path.join(current_app.config["UPLOAD_FOLDER"], filename)
-    return send_file(video_path)
+    return render_template('trim_video.html', form=form, video_url=video_url)
 
 @main.route('/object_detection', methods = ['GET', 'POST'])
 @login_required
