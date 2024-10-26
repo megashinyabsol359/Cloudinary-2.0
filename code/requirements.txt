@@ -12,3 +12,5 @@ setuptools
 moviepy
 ultralytics
 torch
+numpy==1.24
+dlib==19.24.2
